@@ -1,0 +1,130 @@
+# 内网 FLV 流配置说明
+
+## 📡 服务器信息
+
+- **内网 IP**: `10.145.223.230`
+- **端口**: `8080`
+- **协议**: HTTP-FLV
+- **基础 URL**: `http://10.145.223.230:8080/live/`
+
+## 📹 摄像头列表
+
+| ID | 名称 | FLV 流地址 | 位置 |
+|----|------|-----------|------|
+| cam001 | 变压器检测工位摄像头 | `http://10.145.223.230:8080/live/camera01.flv` | 变压器流水线检测工位 |
+| cam002 | 电缆工位摄像头 | `http://10.145.223.230:8080/live/camera02.flv` | 电缆保护管智能制样检测工位 |
+| cam003 | 批量避雷器工位摄像头 | `http://10.145.223.230:8080/live/camera03.flv` | 批量避雷器检测工位 |
+| cam004 | 柱上开关工位摄像头 | `http://10.145.223.230:8080/live/camera04.flv` | 柱上开关自动化检测工位 |
+| cam005 | 短路试验区摄像头 | `http://10.145.223.230:8080/live/camera05.flv` | 短路承受能力试验区 |
+| cam006 | 一二次融合工位摄像头 | `http://10.145.223.230:8080/live/camera06.flv` | 一、二次融合设备检测工位 |
+| cam007 | 厂区入口安防摄像头 | `http://10.145.223.230:8080/live/security01.flv` | 厂区主入口 |
+| cam008 | 环境监测摄像头 | （离线） | 环境监测站 |
+| cam009 | 仓库区域摄像头 | `http://10.145.223.230:8080/live/warehouse.flv` | 样品仓库区 |
+| cam010 | 检测大厅全景摄像头 | `http://10.145.223.230:8080/live/hall.flv` | 检测大厅中央 |
+
+## 🎯 URL 格式规范
+
+```
+http://10.145.223.230:8080/live/{streamName}.flv
+```
+
+**示例**：
+- 摄像头1: `http://10.145.223.230:8080/live/camera01.flv`
+- 安防监控: `http://10.145.223.230:8080/live/security01.flv`
+- 仓库监控: `http://10.145.223.230:8080/live/warehouse.flv`
+
+## ⚠️ 使用注意事项
+
+### 1. 网络连接
+- ✅ 确保客户端可以访问内网 IP `10.145.223.230`
+- ✅ 检查防火墙是否允许 `8080` 端口
+- ✅ 确认流媒体服务器正在运行
+
+### 2. 跨域问题（CORS）
+如果遇到跨域错误，需要在流媒体服务器配置 CORS 头：
+```
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, OPTIONS
+```
+
+### 3. 验证流是否可用
+使用浏览器直接访问测试：
+```
+http://10.145.223.230:8080/live/camera01.flv
+```
+如果可以下载或提示播放，说明流地址正确。
+
+### 4. 流名称映射
+如果实际流名称与配置不同，需要修改代码中的 `videoUrl` 字段：
+
+```javascript
+// 示例：如果实际流名称是 cam_001 而不是 camera01
+videoUrl: 'http://10.145.223.230:8080/live/cam_001.flv'
+```
+
+## 🔧 修改配置
+
+### 方式 1：直接修改代码
+在 [DeviceManagement.vue](file:///c:/Users/Admin/Desktop/qingyuan-project/qingyuan-inspector/src/views/layout/DeviceManagement.vue) 中修改摄像头列表：
+```javascript
+const cameraList = ref([
+  {
+    id: 'cam001',
+    name: '摄像头名称',
+    videoUrl: 'http://10.145.223.230:8080/live/你的流名称.flv',
+    location: '位置描述',
+    status: 'online',
+    type: 'flv'
+  }
+]);
+```
+
+### 方式 2：从后端 API 获取
+替换硬编码的 `cameraList`，改为从接口获取：
+```javascript
+const cameraList = ref([]);
+
+// 从后端获取摄像头列表
+const fetchCameraList = async () => {
+  const response = await fetch('http://10.145.223.230/api/cameras');
+  const data = await response.json();
+  cameraList.value = data.map(cam => ({
+    id: cam.id,
+    name: cam.name,
+    videoUrl: `http://10.145.223.230:8080/live/${cam.streamName}.flv`,
+    location: cam.location,
+    status: cam.status,
+    type: 'flv'
+  }));
+};
+```
+
+## 🚀 快速测试
+
+1. **确认服务器可达**
+   ```bash
+   ping 10.145.223.230
+   ```
+
+2. **测试端口开放**
+   ```bash
+   telnet 10.145.223.230 8080
+   ```
+
+3. **浏览器测试流**
+   ```
+   http://10.145.223.230:8080/live/camera01.flv
+   ```
+
+4. **运行应用**
+   - 设置 `showVideoPopup: true` 查看默认摄像头
+   - 或从 UE5 触发摄像头点击事件
+
+## 📝 已完成的配置
+
+✅ 所有10个摄像头已配置内网 FLV 流地址  
+✅ 默认摄像头设置为 `camera01.flv`  
+✅ FLV 播放器已初始化并支持 flv.js  
+✅ 播放器会自动检测 FLV 格式并使用 flv.js 播放  
+
+现在可以直接测试 FLV 流播放功能！
