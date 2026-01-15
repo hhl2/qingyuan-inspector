@@ -29,7 +29,6 @@
               </span>
             </template>
           </el-table-column>
-
         </el-table>
       </div>
     </div>
@@ -37,28 +36,20 @@
 
   <div v-if="showMenus" class="context-menu" ref="menuRef">
     <div class="context_tan">
-
     </div>
   </div>
-
-
-
 </template>
-
-
 
 <style scoped>
 /* 告警统计卡片样式 */
 .gjtj {
   flex-shrink: 0;
-  /* 不允许压缩 */
 }
 
 /* 表格容器填满剩余高度 */
 .auto-scroll-table {
   flex: 1;
   min-height: 0;
-  /* 允许 flex 子项小于内容高度 */
   overflow: hidden;
 }
 
@@ -81,12 +72,21 @@
 </style>
 
 <script>
+export default {
+  name: "AlertManagement",
+};
 </script>
 
 <script setup>
-import { onMounted, onUnmounted, ref, watch, computed, onBeforeUnmount, inject } from "vue";
+import { onMounted, onUnmounted, ref, watch, inject } from "vue";
 import { queryAlarmInfoStatistics, queryAlarmInfoListPage } from "@/api/user";
+import { DEFAULT_ALERT_STATS, DEFAULT_ALERT_LIST, MOCK_ALERT_STATS, MOCK_ALERT_LIST } from "@/constants/alertMock";
 
+// ========== 兜底数据开关 ==========
+// true = 使用兜底数据（API无数据时显示测试数据）
+// false = 不使用兜底数据（API无数据时显示空）
+const USE_MOCK_FALLBACK = true;
+// ==================================
 
 // 接收从 index 传入的面板状态
 const props = defineProps({
@@ -94,85 +94,78 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-
 })
-
-
-
 
 const showMenus = ref(false);
 const menuRef = ref(null);
+
+// 动态存储参数（可从 roadinfo 获取）
+const currentContractPartId = ref("");
+const currentStationCode = ref("");
+
 const ueResponseData = inject('ueResponseData')
-watch(ueResponseData, async (newVal, oldVal) => {
-  if (newVal) {
-    console.log('接收到新数据:', newVal)
-
-    if (newVal?.json.type && newVal?.json.type == 'poi') {
-      showMenus.value = false
-      setTimeout(() => {
-        showMenus.value = true
-
-      }, 100);
-
-    }
-
+watch(ueResponseData, async (newVal) => {
+  if (newVal?.json?.type === 'poi') {
+    showMenus.value = false
+    setTimeout(() => {
+      showMenus.value = true
+    }, 100);
   }
 })
+
 const handleClickOutside = (event) => {
-  // console.log(event, menuRef.value.contains(event.target))
   if (menuRef.value && menuRef.value.contains(event.target)) {
     showMenus.value = false;
   }
 };
 
+// 告警统计数据
+const gjtjList = ref([...DEFAULT_ALERT_STATS]);
 
-// 表格数据
-var gjtjdata = [
+// 告警列表数据
+const gjtjdata = ref([...DEFAULT_ALERT_LIST]);
 
-
-];
-
-const gjtjList = ref([
-  {
-    alarmTypeName: "设备故障",
-    alarmTypeCount: 5,
-  },
-  {
-    alarmTypeName: "通信异常",
-    alarmTypeCount: 1,
-  },
-  {
-    alarmTypeName: "安防异常",
-    alarmTypeCount: 6,
-  },
-  {
-    alarmTypeName: "环境故障",
-    alarmTypeCount: 6,
-  },
-]);
-
-//告警统计
+// 告警统计
 const getgjtjList = async () => {
-  const searchParams = {
-    contractPartId: "2AF2BC0D2DBB43159CAAA14C98696292", //检测机构ID
-    stationCode: "A1", //工位编码
-  };
-  const response = await queryAlarmInfoStatistics(searchParams);
-  console.log(response);
-  if (response.code == 200) {
-    gjtjList.value = response.data;
+  if (!currentStationCode.value) {
+    if (USE_MOCK_FALLBACK) gjtjList.value = [...MOCK_ALERT_STATS];
+    return;
+  }
+  try {
+    const response = await queryAlarmInfoStatistics({
+      contractPartId: currentContractPartId.value,
+      stationCode: currentStationCode.value,
+    });
+    if (response?.code === 200 && response.data) {
+      gjtjList.value = response.data;
+    } else if (USE_MOCK_FALLBACK) {
+      gjtjList.value = [...MOCK_ALERT_STATS];
+    }
+  } catch (error) {
+    console.error('获取告警统计失败:', error);
+    if (USE_MOCK_FALLBACK) gjtjList.value = [...MOCK_ALERT_STATS];
   }
 };
-//告警列表（详情从列表中获取）
+
+// 告警列表
 const getgjtjdataList = async () => {
-  const searchParams = {
-    contractPartId: "2AF2BC0D2DBB43159CAAA14C98696292", //检测机构ID
-    stationCode: "A1", //工位编码
-  };
-  const response = await queryAlarmInfoListPage(searchParams);
-  console.log(response);
-  if (response.code == 200) {
-    gjtjdata.value = response.data?.list;
+  if (!currentStationCode.value) {
+    if (USE_MOCK_FALLBACK) gjtjdata.value = [...MOCK_ALERT_LIST];
+    return;
+  }
+  try {
+    const response = await queryAlarmInfoListPage({
+      contractPartId: currentContractPartId.value,
+      stationCode: currentStationCode.value,
+    });
+    if (response?.code === 200 && response.data?.list) {
+      gjtjdata.value = response.data.list;
+    } else if (USE_MOCK_FALLBACK) {
+      gjtjdata.value = [...MOCK_ALERT_LIST];
+    }
+  } catch (error) {
+    console.error('获取告警列表失败:', error);
+    if (USE_MOCK_FALLBACK) gjtjdata.value = [...MOCK_ALERT_LIST];
   }
 };
 
@@ -181,44 +174,62 @@ const container = ref(null);
 const offset = ref(0);
 let animationFrameId = null;
 let isScrolling = true;
-// 计算单行高度（需根据实际样式调整）
 const ROW_HEIGHT = 20;
-// 滚动动画
-const startScroll = () => {
-  const maxOffset = gjtjdata.length * ROW_HEIGHT;
 
+const startScroll = () => {
+  const maxOffset = gjtjdata.value.length * ROW_HEIGHT;
   const animate = () => {
     if (!isScrolling) return;
     offset.value += 0.6;
-    // 滚动到复制数据末尾时，重置位置
     if (offset.value >= maxOffset) {
       offset.value = 0;
     }
     animationFrameId = requestAnimationFrame(animate);
   };
-
   animate();
 };
 
-// 暂停滚动
 const pauseScroll = () => {
   isScrolling = false;
   cancelAnimationFrame(animationFrameId);
 };
 
-// 恢复滚动
 const resumeScroll = () => {
   if (!isScrolling) {
     isScrolling = true;
     startScroll();
   }
 };
-onMounted(async () => {
+
+onMounted(() => {
   document.addEventListener("click", handleClickOutside);
-  // getgjtjList();
-  // getgjtjdataList();
+
+  // 从 localStorage 获取参数
+  const roadinfo = localStorage.getItem('roadinfo')
+  if (roadinfo && roadinfo !== 'undefined' && roadinfo !== 'null') {
+    try {
+      const parsed = JSON.parse(roadinfo)
+      if (parsed) {
+        currentContractPartId.value = parsed?.id || ''
+        currentStationCode.value = parsed?.station_code || ''
+
+        // 始终调用，函数内部会处理兜底逻辑
+        getgjtjList()
+        getgjtjdataList()
+      }
+    } catch (error) {
+      console.error('解析 roadinfo 失败:', error)
+      getgjtjList()
+      getgjtjdataList()
+    }
+  } else {
+    getgjtjList()
+    getgjtjdataList()
+  }
 });
+
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  cancelAnimationFrame(animationFrameId);
 });
 </script>

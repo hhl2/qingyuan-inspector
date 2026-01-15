@@ -811,8 +811,7 @@
 
 <script setup>
 import { Search } from "@element-plus/icons-vue";
-import { onMounted, onUnmounted, watch, inject, ref, computed, onBeforeUnmount, nextTick } from "vue";
-import flvjs from "flv.js";
+import { onMounted, onUnmounted, watch, inject, ref, nextTick } from "vue";
 import request from '@/utils/request';
 import {
   queryEquipmentStatistics,
@@ -821,6 +820,24 @@ import {
   queryEquipmentDetail,
   queryEquipmentMaintenanceListPage,
 } from "@/api/user";
+import {
+  DEFAULT_DEVICE_STATS,
+  DEFAULT_DEVICE_LIST,
+  MOCK_DEVICE_STATS,
+  MOCK_DEVICE_LIST,
+  DEFAULT_DEVICE_DETAIL,
+  DEFAULT_DELIVERY_LIST,
+  MOCK_DELIVERY_LIST,
+  DEFAULT_MAINTENANCE_LIST,
+  MOCK_MAINTENANCE_LIST,
+  getEquipmentKindName,
+} from "@/constants/deviceMock";
+
+// ========== 兜底数据开关 ==========
+// true = 使用兜底数据（API无数据时显示测试数据）
+// false = 不使用兜底数据（API无数据时显示空）
+const USE_MOCK_FALLBACK = true;
+// ==================================
 
 // 接收从 index 传入的面板状态
 const props = defineProps({
@@ -828,356 +845,131 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-
 })
 
+// 动态存储参数（从 localStorage 获取）
+const currentContractPartId = ref("");
+const currentStationCode = ref("");
 
 
 const showMenus = ref(false);
-// const showVideoPopup = ref(false);  // 多画面弹窗
 const showSingleVideoPopup = ref(false);  // 单画面弹窗
 const isLoadingVideo = ref(false); // 视频加载状态
 const menuRef = ref(null);
 const menuRefSingle = ref(null);
 const input3 = ref("");
 
-// FLV 播放器相关引用
-// 多画面播放器（动态数组）
-// const videoElements = ref([]);
-// const flvPlayers = ref([]);
-
-// 单画面播放器（1个）
+// EasyPlayer 播放器相关引用（与 type3.vue 一致）
 const videoElementSingle = ref(null);
-const flvPlayerSingle = ref(null);
+const easyPlayerInstance = ref(null);
 
-// 设置video元素引用
-// const setVideoRef = (el, index) => {
-//   if (el) {
-//     videoElements.value[index] = el;
-//   }
-// };
-
-// 当前要显示的摄像头（显示所有在线摄像头）
-// const displayCameras = ref([]);
-
-// 初始化要显示的摄像头
-// const initDisplayCameras = () => {
-//   // 显示所有在线摄像头
-//   const onlineCameras = cameraList.value.filter(cam => cam.status === 'online');
-//   displayCameras.value = onlineCameras;
-//   // 初始化播放器数组
-//   videoElements.value = [];
-//   flvPlayers.value = new Array(onlineCameras.length).fill(null);
-// };
-
-// 当前选中的摄像头信息（初始化为第一个 FLV 摄像头）
+// 当前选中的摄像头信息
 const currentCamera = ref({
-  id: 'cam001',
-  name: '变压器检测工位摄像头',
-  videoUrl: 'http://10.145.223.230:8080/live/camera01.flv',
-  location: '变压器流水线检测工位',
+  id: '',
+  name: '',
+  videoUrl: '',
+  location: '',
   status: 'online'
 });
 
-// 摄像头列表模拟数据（实际项目中从后端获取）
-// 使用内网 FLV 流服务器：10.145.223.230
-const cameraList = ref([
-  {
-    id: 'cam001',
-    name: '变压器检测工位摄像头',
-    // 内网 FLV 流地址 - 摄像头1
-    videoUrl: 'http://10.145.223.230:8080/live/camera01.flv',
-    location: '变压器流水线检测工位',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式实时监控流'
-  },
-  {
-    id: 'cam002',
-    name: '电缆工位摄像头',
-    // 内网 FLV 流地址 - 摄像头2
-    videoUrl: 'http://10.145.223.230:8080/live/camera02.flv',
-    location: '电缆保护管智能制样检测工位',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式实时监控流'
-  },
-  {
-    id: 'cam003',
-    name: '批量避雷器工位摄像头',
-    // 内网 FLV 流地址 - 摄像头3
-    videoUrl: 'http://10.145.223.230:8080/live/camera03.flv',
-    location: '批量避雷器检测工位',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式实时监控流'
-  },
-  {
-    id: 'cam004',
-    name: '柱上开关工位摄像头',
-    // 内网 FLV 流地址 - 摄像头4
-    videoUrl: 'http://10.145.223.230:8080/live/camera04.flv',
-    location: '柱上开关自动化检测工位',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式实时监控流'
-  },
-  {
-    id: 'cam005',
-    name: '短路试验区摄像头',
-    // 内网 FLV 流地址 - 摄像头5
-    videoUrl: 'http://10.145.223.230:8080/live/camera05.flv',
-    location: '短路承受能力试验区',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式实时监控流'
-  },
-  {
-    id: 'cam006',
-    name: '一二次融合工位摄像头',
-    // 内网 FLV 流地址 - 摄像头6
-    videoUrl: 'http://10.145.223.230:8080/live/camera06.flv',
-    location: '一、二次融合设备检测工位',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式实时监控流'
-  },
-  {
-    id: 'cam007',
-    name: '厂区入口安防摄像头',
-    // 内网 FLV 流地址 - 安防摄像头
-    videoUrl: 'http://10.145.223.230:8080/live/security01.flv',
-    location: '厂区主入口',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式安防监控流'
-  },
-  {
-    id: 'cam008',
-    name: '环境监测摄像头',
-    videoUrl: '', // 模拟离线状态
-    location: '环境监测站',
-    status: 'offline',
-    type: 'unknown',
-    description: '摄像头离线'
-  },
-  {
-    id: 'cam009',
-    name: '仓库区域摄像头',
-    // 内网 FLV 流地址 - 仓库摄像头
-    videoUrl: 'http://10.145.223.230:8080/live/warehouse.flv',
-    location: '样品仓库区',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式实时监控流'
-  },
-  {
-    id: 'cam010',
-    name: '检测大厅全景摄像头',
-    // 内网 FLV 流地址 - 大厅摄像头
-    videoUrl: 'http://10.145.223.230:8080/live/hall.flv',
-    location: '检测大厅中央',
-    status: 'online',
-    type: 'flv',
-    description: 'FLV 格式全景监控流'
-  }
-]);
 
-// 初始化所有 FLV 播放器（动态数量）
-/* const initFlvPlayers = async () => {
-  //销毁旧的播放器实例
-  destroyFlvPlayers();
-
-  // 等待 DOM 更新
-  await nextTick();
-
-  // 检查浏览器是否支持 FLV
-  if (!flvjs.isSupported()) {
-    console.error('您的浏览器不支持 FLV 播放');
-    return;
-  }
-
-  // 为每个摄像头初始化播放器
-  for (let i = 0; i < displayCameras.value.length; i++) {
-    const camera = displayCameras.value[i];
-    const videoElement = videoElements.value[i];
-
-    if (!camera || !camera.videoUrl || !videoElement) {
-      console.warn(`摄像头${i + 1}无效或video元素不存在`);
-      continue;
-    }
-
-    try {
-      const videoUrl = camera.videoUrl;
-      const isFlv = videoUrl.toLowerCase().includes('.flv') || videoUrl.toLowerCase().includes('flv');
-
-      if (isFlv) {
-        // 创建 FLV 播放器
-        flvPlayers.value[i] = flvjs.createPlayer({
-          type: 'flv',
-          url: videoUrl,
-          isLive: true,
-          hasAudio: true,
-          hasVideo: true,
-          cors: true,
-          enableWorker: true,
-          enableStashBuffer: false,
-          stashInitialSize: 128
-        }, {
-          enableWorker: true,
-          enableStashBuffer: false,
-          lazyLoadMaxDuration: 3 * 60,
-          seekType: 'range',
-        });
-
-        // 绑定到 video 元素
-        flvPlayers.value[i].attachMediaElement(videoElement);
-
-        // 添加错误监听
-        flvPlayers.value[i].on(flvjs.Events.ERROR, (errorType, errorDetail, errorInfo) => {
-          console.error(`摄像头${i + 1} FLV 播放错误:`, errorType, errorDetail, errorInfo);
-        });
-
-        // 加载并播放
-        flvPlayers.value[i].load();
-        flvPlayers.value[i].play().catch(err => {
-          console.error(`摄像头${i + 1}播放失败:`, err);
-        });
-
-        console.log(`摄像头${i + 1} FLV 播放器初始化成功`);
-      } else {
-        // 非 FLV 格式，使用原生 video 播放
-        console.log(`摄像头${i + 1}使用原生 video 播放`);
-        videoElement.src = videoUrl;
-        videoElement.play().catch(err => {
-          console.error(`摄像头${i + 1}原生视频播放失败:`, err);
-        });
-      }
-    } catch (error) {
-      console.error(`摄像头${i + 1}初始化失败:`, error);
-    }
-  }
-}; */
-
-// 销毁所有 FLV 播放器
-/* const destroyFlvPlayers = () => {
-  for (let i = 0; i < flvPlayers.value.length; i++) {
-    if (flvPlayers.value[i]) {
-      try {
-        flvPlayers.value[i].pause();
-        flvPlayers.value[i].unload();
-        flvPlayers.value[i].detachMediaElement();
-        flvPlayers.value[i].destroy();
-        flvPlayers.value[i] = null;
-      } catch (error) {
-        console.error(`销毁播放器${i + 1}时出错:`, error);
-        flvPlayers.value[i] = null;
-      }
-    }
-  }
-  console.log('所有 FLV 播放器已销毁');
-}; */
-
-// 初始化单画面 FLV 播放器
+// 初始化单画面播放器 (使用 EasyPlayer，与 type3.vue 一致)
 const initSingleFlvPlayer = async () => {
+  console.log('🚀 开始初始化 EasyPlayer 播放器...');
+
   // 销毁旧的播放器
   destroySingleFlvPlayer();
 
   await nextTick();
 
-  if (!videoElementSingle.value || !currentCamera.value.videoUrl) {
-    console.warn('单画面视频元素或 URL 不存在');
-    return;
-  }
+  // 检查元素和URL是否存在
+  console.log('🎬 检查:', {
+    hasVideoElement: !!videoElementSingle.value,
+    hasVideoUrl: !!currentCamera.value.videoUrl,
+    videoUrl: currentCamera.value.videoUrl,
+    popupVisible: showSingleVideoPopup.value
+  });
 
-  if (!flvjs.isSupported()) {
-    console.error('您的浏览器不支持 FLV 播放');
+  if (!videoElementSingle.value || !currentCamera.value.videoUrl) {
+    console.warn('⚠️ 视频元素或 URL 不存在');
+
+    // 如果有URL但元素还没准备好，可能是DOM还在渲染，等待后重试
+    if (currentCamera.value.videoUrl && showSingleVideoPopup.value && !videoElementSingle.value) {
+      console.log('🔄 video元素未就绪，200ms后重试...');
+      setTimeout(() => {
+        initSingleFlvPlayer();
+      }, 200);
+    }
     return;
   }
 
   try {
     const videoUrl = currentCamera.value.videoUrl;
-    const isFlv = videoUrl.toLowerCase().includes('.flv') || videoUrl.toLowerCase().includes('flv');
+    console.log('📹 视频URL:', videoUrl);
+    console.log('🎬 使用 EasyPlayer 播放器');
 
-    if (isFlv) {
-      flvPlayerSingle.value = flvjs.createPlayer({
-        type: 'flv',
-        url: videoUrl,
-        isLive: true,
-        hasAudio: true,
-        hasVideo: true,
-        cors: true,
-        enableWorker: true,
-        enableStashBuffer: false,
-        stashInitialSize: 128
-      }, {
-        enableWorker: true,
-        enableStashBuffer: false,
-        lazyLoadMaxDuration: 3 * 60,
-        seekType: 'range',
-      });
-
-      flvPlayerSingle.value.attachMediaElement(videoElementSingle.value);
-
-      flvPlayerSingle.value.on(flvjs.Events.ERROR, (errorType, errorDetail, errorInfo) => {
-        console.error('单画面 FLV 播放错误:', errorType, errorDetail, errorInfo);
-      });
-
-      flvPlayerSingle.value.load();
-      flvPlayerSingle.value.play().catch(err => {
-        console.error('单画面播放失败:', err);
-      });
-
-      console.log('单画面 FLV 播放器初始化成功');
-    } else {
-      console.log('单画面使用原生 video 播放');
-      videoElementSingle.value.src = videoUrl;
-      videoElementSingle.value.play().catch(err => {
-        console.error('单画面原生视频播放失败:', err);
-      });
+    // 检查 EasyPlayer 是否已加载
+    if (!window.EasyPlayerPro) {
+      console.error('❌ EasyPlayer 库未加载，请检查 index.html 中的脚本引用');
+      return;
     }
+
+    // 直接初始化播放器
+    initEasyPlayer(videoUrl);
   } catch (error) {
-    console.error('单画面初始化失败:', error);
+    console.error('❌ 播放器初始化失败:', error);
   }
 };
 
-// 销毁单画面 FLV 播放器
+// 初始化 EasyPlayer
+const initEasyPlayer = (videoUrl) => {
+  try {
+    console.log('🎬 初始化 EasyPlayer，URL:', videoUrl);
+
+    // 如果是相对路径，转换为绝对URL
+    let absoluteUrl = videoUrl;
+    if (videoUrl && !videoUrl.match(/^(http|https|ws|wss|webrtc|wt|artc):/)) {
+      absoluteUrl = window.location.origin + videoUrl;
+      console.log('🔄 转换相对路径为绝对URL:', absoluteUrl);
+    }
+
+    // 创建播放器实例
+    easyPlayerInstance.value = new window.EasyPlayerPro(videoElementSingle.value, {
+      stretch: true,
+      hasAudio: true,
+      autoplay: true,
+      live: false
+    });
+
+    // 播放视频
+    easyPlayerInstance.value.play(absoluteUrl).then(() => {
+      console.log('✅ EasyPlayer 播放成功');
+    }).catch((error) => {
+      if (error.message && error.message.includes('Maximum call stack size exceeded')) {
+        console.warn('⚠️ EasyPlayer 内部警告（不影响播放）:', error.message);
+      } else {
+        console.error('❌ EasyPlayer 播放失败:', error);
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ EasyPlayer 初始化失败:', error);
+  }
+};
+
+// 销毁播放器
 const destroySingleFlvPlayer = () => {
-  if (flvPlayerSingle.value) {
+  if (easyPlayerInstance.value) {
     try {
-      flvPlayerSingle.value.pause();
-      flvPlayerSingle.value.unload();
-      flvPlayerSingle.value.detachMediaElement();
-      flvPlayerSingle.value.destroy();
-      flvPlayerSingle.value = null;
-      console.log('单画面 FLV 播放器已销毁');
+      easyPlayerInstance.value.destroy();
+      easyPlayerInstance.value = null;
+      console.log('✅ EasyPlayer 播放器已销毁');
     } catch (error) {
-      console.error('销毁单画面播放器时出错:', error);
-      flvPlayerSingle.value = null;
+      console.error('销毁 EasyPlayer 播放器时出错:', error);
+      easyPlayerInstance.value = null;
     }
   }
 };
-
-// 打开多画面监控（按钮点击）
-/* const openMultiView = async () => {
-  showVideoPopup.value = true;
-  initDisplayCameras();
-  await nextTick();
-  initFlvPlayers();
-}; */
-
-// 关闭多画面弹窗
-/* const closeVideoPopup = () => {
-  destroyFlvPlayers();
-  showVideoPopup.value = false;
-  currentCamera.value = {
-    id: '',
-    name: '',
-    videoUrl: '',
-    location: '',
-    status: 'online'
-  };
-}; */
 
 // 关闭单画面弹窗
 const closeSingleVideoPopup = () => {
@@ -1218,184 +1010,92 @@ const openCameraVideo = async (equipmentId) => {
 const closeMenus = () => {
   showMenus.value = false;
 };
-const menuRef2 = ref(null);
+
 const ueResponseData = inject('ueResponseData')
 watch(ueResponseData, async (newVal, oldVal) => {
   if (newVal) {
-    console.log('设备管理接收到UE数据:', newVal)
+    const jsonRes = newVal?.json
 
-    // 处理摄像头/设备点击事件
-    if (newVal?.json?.type === 'sbgl' || newVal?.json?.type === 'camera') {
-      const id = newVal?.json?.id;
+    // 1. 处理工位/中心切换逻辑 (同步 index.vue 的参数更新)
+    if (jsonRes && (jsonRes.id === 'JCZX' || jsonRes.id === 'JCGW')) {
+      console.log('设备管理：收到工位切换数据', jsonRes)
+      currentContractPartId.value = jsonRes.id || ''
+      currentStationCode.value = jsonRes.station_code || ''
+
+      // 参数更新后重新获取数据
+      getgjtjList()
+      getsbList()
+    }
+
+    // 2. 处理摄像头/设备点击事件
+    if (jsonRes?.type === 'sbgl' || jsonRes?.type === 'camera') {
+      const id = jsonRes?.id;
       if (id) {
         openCameraVideo(id);
       }
     }
   }
 })
-const handleClickOutside = (event) => {
-  if (menuRef2.value && menuRef2.value.contains(event.target)) {
-    // showVideoPopup.value = false;
-  }
-};
 
 
-// 设备类型转换函数
-const getStatusTexts = (status) => {
-  const statusMap = {
-    1: "检测设备",
-    2: "环境设备",
-    3: "安防设备",
-  };
-  return statusMap[status] || "未知设备";
-};
-const sblist = ref([
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    index: 1,
-    equipmentName: "摄像头1",
-    equipmentKindName: "安防监控",
-    equipmentMonitoringPoint: "工位1号检测点",
-    countName: "正常",
-  },
-]);
-const gjtjList = ref([
-  {
-    equipmentKind: 1,
-    equipmentKindCount: 4,
-  },
-  {
-    equipmentKind: 2,
-    equipmentKindCount: 6,
-  },
-  {
-    equipmentKind: 3,
-    equipmentKindCount: 4,
-  },
-]);
+// 设备类型转换函数（使用 mock 文件中的函数）
+const getStatusTexts = getEquipmentKindName;
 
-//设备统计
+// 设备列表 - 初始化为空数组
+const sblist = ref([...DEFAULT_DEVICE_LIST]);
+
+// 设备统计 - 初始化为空数组
+const gjtjList = ref([...DEFAULT_DEVICE_STATS]);
+
+// 设备统计
 const getgjtjList = async () => {
-  const searchParams = {
-    contractPartId: "2AF2BC0D2DBB43159CAAA14C98696292", //检测机构ID
-    stationCode: "A1", //工位编码
-  };
-  const res = await queryEquipmentStatistics(searchParams);
-  console.log(res);
-  if (res?.code == 200) {
-    gjtjList.value = res.data;
-
+  if (!currentStationCode.value) {
+    if (USE_MOCK_FALLBACK) gjtjList.value = [...MOCK_DEVICE_STATS];
+    return;
   }
-
+  try {
+    const res = await queryEquipmentStatistics({
+      contractPartId: currentContractPartId.value,
+      stationCode: currentStationCode.value,
+    });
+    if (res?.code === 200 && res.data) {
+      gjtjList.value = res.data;
+    } else if (USE_MOCK_FALLBACK) {
+      gjtjList.value = [...MOCK_DEVICE_STATS];
+    }
+  } catch (error) {
+    console.error('获取设备统计失败:', error);
+    if (USE_MOCK_FALLBACK) gjtjList.value = [...MOCK_DEVICE_STATS];
+  }
 };
 
-//设备列表
+// 设备列表
 const getsbList = async () => {
-  const searchParams = {
-    contractPartId: "2AF2BC0D2DBB43159CAAA14C98696292", //检测机构ID
-    stationCode: "A1", //工位编码
-    pageNo: 1,
-    pageSize: 999,
-    keyword: input3.value ? input3.value : ''
-  };
-  const res = await queryEquipmentListPage(searchParams);
-  console.log(res);
-  if (res?.code == 200) {
-    sblist.value = res.data?.list ? res.data?.list : [];
-
-
+  if (!currentStationCode.value) {
+    if (USE_MOCK_FALLBACK) sblist.value = [...MOCK_DEVICE_LIST];
+    return;
+  }
+  try {
+    const res = await queryEquipmentListPage({
+      contractPartId: currentContractPartId.value,
+      stationCode: currentStationCode.value,
+      pageNo: 1,
+      pageSize: 999,
+      keyword: input3.value || ''
+    });
+    if (res?.code === 200 && res.data?.list?.length > 0) {
+      sblist.value = res.data.list;
+    } else if (USE_MOCK_FALLBACK) {
+      sblist.value = [...MOCK_DEVICE_LIST];
+    }
+  } catch (error) {
+    console.error('获取设备列表失败:', error);
+    if (USE_MOCK_FALLBACK) sblist.value = [...MOCK_DEVICE_LIST];
   }
 };
 
-// 通用函数：根据摄像头ID获取视频URL并打开弹窗
+
+// 通用函数：根据摄像头ID获取视频URL并打开弹窗（与 type3.vue 一致）
 const fetchCameraVideoAndOpenPopup = async (cameraId, cameraName = '摄像头', cameraStatus = 'online') => {
   // 更新摄像头名称和状态
   currentCamera.value.name = cameraName;
@@ -1419,12 +1119,17 @@ const fetchCameraVideoAndOpenPopup = async (cameraId, cameraName = '摄像头', 
 
   // 异步加载视频URL（不阻塞UI）
   try {
-    // 调用API获取视频预览URL（使用代理避免跨域）
+    // 使用 typeof 检查变量是否存在，避免 ReferenceError
+    const safeCameraId = typeof cameraId !== 'undefined' && cameraId ? String(cameraId) : '';
+
+    console.log('📹 准备请求视频URL，cameraId:', safeCameraId);
+
+    // 调用API获取视频预览URL（使用 POST 方法，与 type3.vue 一致）
     const response = await request({
       url: '/api/qydigital-park-service/qyVideoPoint/previewURLs',
-      method: 'get',
-      params: {
-        cameraIndexCode: cameraId
+      method: 'post',
+      data: {
+        cameraIndexCode: safeCameraId
       }
     });
 
@@ -1432,9 +1137,16 @@ const fetchCameraVideoAndOpenPopup = async (cameraId, cameraName = '摄像头', 
     if (response && response.code === '0' && response.data && response.data.url) {
       // 将返回的URL赋值给currentCamera.videoUrl
       currentCamera.value.videoUrl = response.data.url;
-      console.log('成功获取视频URL:', response.data.url);
+      console.log('✅ 成功获取视频URL:', response.data.url);
+      console.log('📊 URL类型:', response.data.url.match(/^(http|https|ws|wss):/)?.[0] || '未知协议');
+
+      // 等待 DOM 更新后初始化播放器
+      await nextTick();
+      if (currentCamera.value.videoUrl) {
+        initSingleFlvPlayer();
+      }
     } else {
-      console.warn('获取视频URL失败或返回数据为空:', response);
+      console.warn('⚠️ 获取视频URL失败或返回数据为空:', response);
       // videoUrl保持为空，弹窗会显示"暂无视频信号"
     }
   } catch (error) {
@@ -1446,41 +1158,27 @@ const fetchCameraVideoAndOpenPopup = async (cameraId, cameraName = '摄像头', 
   }
 };
 
+
 const handleRowClick = async (row) => {
   console.log(row, "设备详情");
 
-  // 调用通用函数，传入行数据中的id、名称和状态
+  // 1. 打开视频弹窗 (与 type3.vue 一致)
   await fetchCameraVideoAndOpenPopup(
     row.id,
     row.equipmentName || row.countName || '摄像头',
     'online'
   );
+
+  // 2. 获取设备详细信息并在侧边详情面板显示
+  if (row.id) {
+    getsbxqList(row.id);
+    getsjxxList(row.id);
+    getwxxxList(row.id);
+    showMenus.value = true;
+  }
 };
-//设备列表详情
-const sbxqList = ref({
-  id: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-  equipmentCode: "YQUPSDY007",
-  equipmentName: "直流源",
-  equipmentStatus: null,
-  equipmentStatusName: null,
-  equipmentKind: null,
-  equipmentKindName: null,
-  equipmentMonitoringPoint: null,
-  supplier: null,
-  responsibilityPerson: null,
-  responsibilityPersonPhone: null,
-  equipmentType: null,
-  equipmentFunction: null,
-  mainParam: null,
-  stationId: "7A37A22941F54811B01511CAFBFB827D",
-  stationCode: null,
-  stationName: null,
-  responsibilityDepartment: null,
-  factoryCode: null,
-  stationEquipmentId: null,
-  productionDate: null,
-  playingUrl: null,
-});
+// 设备列表详情 - 使用 mock 文件中的默认数据
+const sbxqList = ref({ ...DEFAULT_DEVICE_DETAIL });
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
   const year = date.getFullYear();
@@ -1491,69 +1189,59 @@ const formatDate = (timestamp) => {
 }
 
 const getsbxqList = async (id) => {
+  if (!id) return;
   const searchParams = {
-    contractPartId: "2AF2BC0D2DBB43159CAAA14C98696292",
-    stationCode: "A1",
+    contractPartId: currentContractPartId.value,
+    stationCode: currentStationCode.value,
     id: id,
   };
-  const res = await queryEquipmentDetail(searchParams);
-  console.log(res.data, "res");
-  if (res?.code == 200) {
-    sbxqList.value = res.data;
-
+  try {
+    const res = await queryEquipmentDetail(searchParams);
+    if (res?.code == 200) {
+      sbxqList.value = res.data;
+    }
+  } catch (error) {
+    console.error('获取设备详情失败:', error);
   }
-
-  console.log(sbxqList.value);
 };
 //查询送检信息
-
-const sjxx = ref([
-  {
-    id: "08D502EA849745FA8E0B8D4EAEFBA3C91",
-    equipmentId: "08D502EA849745FA8E0B8D4EAEFBA3C9",
-    detectDepartment: "XXXX",
-    nextDeliveryDateStr: "2025-10-30 12:00:00",
-  },
-]);
+const sjxx = ref([...DEFAULT_DELIVERY_LIST]);
 
 const getsjxxList = async (id) => {
+  if (!id) return;
   const searchParams = {
-    contractPartId: "2AF2BC0D2DBB43159CAAA14C98696292",
-    stationCode: "A1",
+    contractPartId: currentContractPartId.value,
+    stationCode: currentStationCode.value,
     equipmentId: id,
   };
-  const res = await queryEquipmentDeliveryListPage(searchParams);
-  console.log(res);
-  if (res?.code == 200) {
-
-    sjxx.value = res.data?.list ? res.data?.list : [];
+  try {
+    const res = await queryEquipmentDeliveryListPage(searchParams);
+    if (res?.code == 200) {
+      sjxx.value = res.data?.list || [];
+    }
+  } catch (error) {
+    console.error('获取送检信息失败:', error);
   }
-
 };
 
-const wxxxList = ref([
-  {
-    equipmentMaintenanceContent: "",
-    equipmentMaintenanceDateStr: "2025-09-25",
-    maintenanceDepartment: "",
-    maintenancePerson: "张玉树",
-    contact: "19120618464",
-  },
-]);
+// 维修记录 - 使用默认 Mock 数据
+const wxxxList = ref([...DEFAULT_MAINTENANCE_LIST]);
 
 const getwxxxList = async (id) => {
+  if (!id) return;
   const searchParams = {
-    contractPartId: "2AF2BC0D2DBB43159CAAA14C98696292",
-    stationCode: "A1",
+    contractPartId: currentContractPartId.value,
+    stationCode: currentStationCode.value,
     equipmentId: id,
   };
-  const res = await queryEquipmentMaintenanceListPage(searchParams);
-  console.log(res);
-  if (res?.code == 200) {
-    wxxxList.value = res.data?.list ? res.data?.list : [];
-
+  try {
+    const res = await queryEquipmentMaintenanceListPage(searchParams);
+    if (res?.code == 200) {
+      wxxxList.value = res.data?.list || [];
+    }
+  } catch (error) {
+    console.error('获取维修记录失败:', error);
   }
-
 };
 onUnmounted(() => {
   // 清理所有 FLV 播放器
@@ -1562,11 +1250,23 @@ onUnmounted(() => {
   // document.removeEventListener("click", handleClickOutside);
 });
 onMounted(() => {
-  // 初始化要显示的摄像头列表
-  // initDisplayCameras();
-  // getgjtjList();
-  // getsbList();
-  // document.addEventListener("click", handleClickOutside);
+  // 从 localStorage 获取参数
+  const roadinfo = localStorage.getItem('roadinfo')
+  if (roadinfo && roadinfo !== 'undefined' && roadinfo !== 'null') {
+    try {
+      const parsed = JSON.parse(roadinfo)
+      if (parsed) {
+        currentContractPartId.value = parsed?.id || ''
+        currentStationCode.value = parsed?.station_code || ''
+      }
+    } catch (error) {
+      console.error('解析 roadinfo 失败:', error)
+    }
+  }
+
+  // 始终调用，函数内部会处理兜底逻辑
+  getgjtjList()
+  getsbList()
 });
 
 let scrollInterval = null;
