@@ -1,5 +1,15 @@
 import request from '@/utils/request';
 
+
+export const querySampleDetectionDetail = (data) =>
+  request({
+    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/querySampleDetectionDetail',
+    method: 'post',
+    data
+  });
+
+
+
 // 获取检测工位-工位信息
 export const queryDetectStationInfo = (data) =>
   request({

@@ -13,6 +13,8 @@ const DeviceManagement = () => import('@/views/layout/DeviceManagement.vue')
 
 const kb = () => import('@/views/layout/kb.vue')
 
+const fangzhen = () => import('@/views/layout/fangzhen.vue')
+
 
 
 // 1. 定义路由规则:ml-citation{ref="2,3" data="citationList"}
@@ -50,6 +52,18 @@ const routes = [
 
         }
 
+      },
+      {
+        path: '/fangzhen',
+        component: fangzhen,
+        name: 'fangzhen',
+        meta: {
+          title: '仿真',
+          showMenu: false,
+          keepAlive: false, // 如果需要缓存页面
+          showball: false,
+
+        }
       },
 
 

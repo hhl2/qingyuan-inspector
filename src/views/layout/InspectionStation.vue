@@ -370,7 +370,7 @@ const props = defineProps({
 })
 
 // 视频路径计算
-const videoName = ref('批量避雷器检测工位')
+const videoName = ref('批量避雷器检测实验室')
 const videoSrc = computed(() => {
   const fileName = VIDEO_NAME_MAP[videoName.value]
   return fileName ? `${getVideoBasePath()}${fileName}` : null
@@ -381,7 +381,7 @@ const setVideo = (name) => {
     videoName.value = name
   } else {
     console.warn(`视频 ${name} 不存在，使用默认视频`)
-    videoName.value = '批量避雷器检测工位'
+    videoName.value = '批量避雷器检测实验室'
   }
 }
 
@@ -534,8 +534,8 @@ onMounted(() => {
     try {
       const parsed = JSON.parse(roadinfo)
       if (parsed) {
-        gcgwList.value.stationName = parsed?.name || '批量避雷器检测工位'
-        videoName.value = parsed?.name || '批量避雷器检测工位'
+        gcgwList.value.stationName = parsed?.name || '批量避雷器检测实验室'
+        videoName.value = parsed?.name || '批量避雷器检测实验室'
         currentContractPartId.value = parsed?.id || ''
         currentStationCode.value = parsed?.station_code || ''
 

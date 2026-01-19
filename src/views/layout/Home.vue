@@ -1,5 +1,9 @@
 <template>
-    <div></div>
+    <div>
+
+
+
+    </div>
 </template>
 
 <style scoped>
@@ -60,6 +64,7 @@ const callParentMethod = (message) => {
         console.error('方法未成功注入')
     }
 }
+
 
 const ue5click = (index) => {
     console.log('点击触发', { "code": 1, "type": "btn", "data": { "id": index } });
