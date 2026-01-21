@@ -3,6 +3,68 @@
  * 用于开发测试以及 API 无数据时的兜底显示
  */
 
+//防真数据
+export const MOCK_FAngZhen = {
+    "id": "CF471BF46B2541D79AFB573A1E3E643B",
+    "sampleId": "686572CB43BF4C31AF25119286D07A09",
+    "sampleCode": "勿动-ms广东-202512019-D-1",
+    "sampleName": "12米加强杆装配式基础组合件设备成套装置",
+    "entityCode": null,
+    "planCode": "P202512081029447722",
+    "planStatus": 0,
+    "planStatusName": "待下单",
+    "planProcessStatus": 40,
+    "planProcessStatusName": "预处理",
+    "sampleDeliveryTime": 1765161009253,
+    "sampleDeliveryTimeStr": "2025-12-08 10:30:09",
+    "actualTestStartTime": null,
+    "actualTestStartTimeStr": null,
+    "actualTestEndTime": null,
+    "actualTestEndTimeStr": null,
+    "planOrderTime": null,
+    "planOrderTimeStr": null,
+    "createTime": 1765160984155,
+    "createTimeStr": "2025-12-08 10:29:44",
+    "updateTime": 1765161009275,
+    "updateTimeStr": "2025-12-08 10:30:09",
+    "planProcessStatusTime": 1765161009297,
+    "planProcessStatusTimeStr": "2025-12-08 10:30:09",
+    "testResult": null,
+    "testResultName": "",
+    "materialId": "010076100029",
+    "materialName": "12米加强杆装配式基础组合件设备成套装置",
+    "standardClassifyCode": null,
+    "standardClassifyName": null,
+    "levelOneCode": null,
+    "levelOneName": null,
+    "levelTwoCode": null,
+    "levelTwoName": null,
+    "levelThreeCode": null,
+    "levelThreeName": null,
+    "levelFourCode": null,
+    "levelFourName": null,
+    "lstPlanResult": [
+        {
+            "id": "e1e8493f06154a899232c5a3ac1ffebe",
+            "detectionProjectId": "2BBEB16660534D83B3DCE217963D217A",
+            "detectionProjectCode": "KZSHHKZDLCL01",
+            "detectionProjectName": "空载损耗和空载电流测量",
+            "testResult": null,
+            "testResultName": null,
+            "lstPlanResultParam": null
+        },
+        {
+            "id": "b6f26784fdf04c1d923ed76ffdddd508",
+            "detectionProjectId": "9076EDF8A60A409ABE85313C4898836C",
+            "detectionProjectCode": "DYBCLHLJZBHJD01",
+            "detectionProjectName": "电压比测量和联结组标号检定",
+            "testResult": null,
+            "testResultName": null,
+            "lstPlanResultParam": null
+        }
+    ]
+}
+
 // 工位信息默认数据
 export const DEFAULT_GCGW_DATA = {
     id: '',

@@ -57,7 +57,9 @@ export default {
             MatchViewportRes: true,
             HoveringMouse: true,
             OfferToReceive: true,
-            WaitForStream: true
+            WaitForStream: true,
+            AutoPlayVideo: true,        // 自动播放视频
+            AutoConnect: true            // 自动连接到信令服务器
           }
         })
 
