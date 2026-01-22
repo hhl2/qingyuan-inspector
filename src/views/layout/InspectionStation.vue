@@ -345,29 +345,33 @@
 
         <div class="bjLists">
           <div class="bjList">
-            <div class="bjList_box">
+            <div class="bjList_boxs">
               <div class="bjList_box_label">样品编码：</div>
-              <div>686572CB43BF4C31AF25119286D07A09</div>
+              <div>{{ lstPlanResults.sampleCode }}</div>
             </div>
-            <div class="bjList_box">
+
+          </div>
+          <div class="bjList">
+
+            <div class="bjList_boxs">
               <div class="bjList_box_label">样品名称：</div>
-              <div>12米加强杆装配式基础组合件设备成套装置</div>
+              <div>{{ lstPlanResults.sampleName }}</div>
             </div>
           </div>
 
           <div class="bjList">
             <div class="bjList_box">
               <div class="bjList_box_label">检测开始时间：</div>
-              <div>2026-01-20</div>
+              <div>{{ lstPlanResults.actualTestStartTimeStr }}</div>
             </div>
             <div class="bjList_box">
               <div class="bjList_box_label">状态：</div>
-              <div>预处理</div>
+              <div>{{ lstPlanResults.planProcessStatusName }}</div>
             </div>
           </div>
         </div>
 
-        <template v-for="(item, index) in lstPlanResult" :key="index">
+        <template v-for="(item, index) in lstPlanResults.lstPlanResult" :key="index">
           <div class="bjLists">
             <div class="bjListx">
               <div>{{ item.detectionProjectName }}</div>
@@ -418,7 +422,7 @@ const emit = defineEmits(['update:isPanelVisible']);
 // ========== 兜底数据开关 ==========
 // true = 使用兜底数据（API无数据时显示测试数据）
 // false = 不使用兜底数据（API无数据时显示空）
-const USE_MOCK_FALLBACK = false;
+const USE_MOCK_FALLBACK = true;
 // ==================================
 
 // 接收从 index 传入的面板状态（支持 v-model）
@@ -449,17 +453,19 @@ const showMenux = ref(true);
 
 
 const currentUniqueCode = ref("");
-const lstPlanResult = ref([]);
+const lstPlanResults = ref([]);
 const querySampleDetectionDetails = async () => {
   const res = await querySampleDetectionDetail({
     contractPartId: currentContractPartId.value,
     uniqueCode: currentStationCode.value,
     stationCode: currentUniqueCode.value
   });
-  if (res?.code === 200 && res.data) {
-    lstPlanResult.value = res.data;
+  if (res?.code === 200 && res.data?.sampleDetectionDetailRespList?.length > 0) {
+    // 从新的API结构中提取第一个样品的 lstPlanResults
+    lstPlanResults.value = res.data.sampleDetectionDetailRespList[0] || [];
   } else {
-    lstPlanResult.value = MOCK_FAngZhen.lstPlanResult || [];
+    // 使用兜底数据
+    lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList?.[0] || [];
   }
 }
 
@@ -492,7 +498,7 @@ const currentStationCode = ref("");
 // 获取检测工位-工位信息
 const getjcgwList = async () => {
   if (!currentStationCode.value) {
-    if (USE_MOCK_FALLBACK) gcgwList.value = { ...MOCK_GCGW_DATA };
+    if (USE_MOCK_FALLBACK) gcgwList.value = { ...MOCK_GCGW_DATA[0] };
     return;
   }
   try {
@@ -501,13 +507,14 @@ const getjcgwList = async () => {
       stationCode: currentStationCode.value,
     });
     if (response?.code === 200 && response.data) {
-      gcgwList.value = response.data;
+
+      gcgwList.value = response.data.stationInfoRespDTOList[0] || [];
     } else if (USE_MOCK_FALLBACK) {
-      gcgwList.value = { ...MOCK_GCGW_DATA };
+      gcgwList.value = { ...MOCK_GCGW_DATA[0] };
     }
   } catch (error) {
     console.error('获取工位信息失败:', error);
-    if (USE_MOCK_FALLBACK) gcgwList.value = { ...MOCK_GCGW_DATA };
+    if (USE_MOCK_FALLBACK) gcgwList.value = { ...MOCK_GCGW_DATA[0] };
   }
 };
 
@@ -627,7 +634,7 @@ const initializeStationData = () => {
     videoName.value = defaultStationName;
     defaultStationNames.value = defaultStationName;
     setVideo(videoName.value);
-    return false;
+    return { id: '' }; // 返回空 id 的对象
   }
 
   // 尝试解析 JSON
@@ -645,7 +652,7 @@ const initializeStationData = () => {
     currentStationCode.value = parsed.station_code || '';
 
     setVideo(videoName.value);
-    return true;
+    return parsed;
   } catch (error) {
     console.error('解析 roadinfo 失败:', error);
     console.error('roadinfo 原始值:', roadinfo);
@@ -655,7 +662,7 @@ const initializeStationData = () => {
     videoName.value = defaultStationName;
     defaultStationNames.value = defaultStationName;
     setVideo(videoName.value);
-    return false;
+    return { id: '' }; // 返回空 id 的对象
   }
 };
 const ueResponseData = inject('ueResponseData')
@@ -690,22 +697,32 @@ watch(showMenux, (newValue) => {
     // 当弹窗关闭时，显示侧边面板
     emit('update:isPanelVisible', true);
   }
-});
+}, { immediate: false }); // 不在初始化时执行
 
 // 生命周期
 onMounted(() => {
   // 注册全局点击事件监听器
   document.addEventListener("click", handleClickOutside);
 
-  // 初始化工位数据
-  initializeStationData();
+  // 初始化工位数据并检查 id
+  const parsedData = initializeStationData();
+
+  // 根据 id 的存在与否自动设置面板显示状态
+  if (parsedData && parsedData.id) {
+    // 有 id：显示面板
+    emit('update:isPanelVisible', true);
+  } else {
+    // 没有 id：隐藏面板
+    emit('update:isPanelVisible', false);
+  }
 
   // 统一调用 API（内部会根据 stationCode 决定是否使用兜底数据）
   getjcgwList();
   getjcrwList();
 
 
-  lstPlanResult.value = MOCK_FAngZhen.lstPlanResult || [];
+  // 使用新的数据结构初始化
+  lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList?.[0] || [];
 });
 
 onUnmounted(() => {
@@ -741,13 +758,23 @@ onUnmounted(() => {
 }
 
 .context_tans {
-  width: 555px;
+  width: 552px;
   height: 340px;
   background: transparent;
   border: none;
-  margin: 50px 0px 0px 20px;
-  overflow: hidden;
+  margin: 40px 0px 0px 20px;
+  overflow-y: auto;
   border-radius: 4px;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+/* 隐藏 WebKit 滚动条 */
+.context_tans::-webkit-scrollbar {
+  display: none;
 }
 
 /* 关闭按钮 */
@@ -781,21 +808,30 @@ onUnmounted(() => {
   border: 1px solid #6dbdf1;
   display: flex;
   flex-direction: column;
-  padding: 10px 10px;
+  padding: 8px 10px;
   border-radius: 3px;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .bjList_box {
   width: 50%;
   display: flex;
   color: #ffffff;
-  font-size: 10px;
+  font-size: 13px;
+  margin: 2px 0px;
+}
+
+.bjList_boxs {
+  width: 100%;
+  display: flex;
+  color: #ffffff;
+  font-size: 13px;
+  margin: 2px 0px;
 }
 
 .bjList_box_label {
   color: #6bbbee;
-  margin-right: 16px;
+  margin-right: 0px;
 }
 
 .bjList {
@@ -808,6 +844,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   color: #6bbbee;
+  margin-bottom: 10px;
 }
 
 /* 无视频占位 */

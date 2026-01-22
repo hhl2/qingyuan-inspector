@@ -258,7 +258,7 @@ watch(ueResponseData, async (newVal, oldVal) => {
 
         const jsonRes = newVal?.json
 
-        if (jsonRes && jsonRes.id === 'JCZX') {
+        if (jsonRes && jsonRes.type === 'JCZX') {
             console.log('打开检测中心:', jsonRes)
             localStorage.setItem('roadinfo', JSON.stringify(jsonRes))
 
@@ -267,7 +267,7 @@ watch(ueResponseData, async (newVal, oldVal) => {
                 router.push('/kb')
             })
         }
-        if (jsonRes && jsonRes.id === 'JCGW') {
+        if (jsonRes && jsonRes.type === 'JCGW') {
             console.log('打开检测工位:', jsonRes)
             localStorage.setItem('roadinfo', JSON.stringify(jsonRes))
             nextTick(() => {

@@ -3,66 +3,107 @@
  * 用于开发测试以及 API 无数据时的兜底显示
  */
 
-//防真数据
+//防真数据 - 匹配实际API返回结构
 export const MOCK_FAngZhen = {
-    "id": "CF471BF46B2541D79AFB573A1E3E643B",
-    "sampleId": "686572CB43BF4C31AF25119286D07A09",
-    "sampleCode": "勿动-ms广东-202512019-D-1",
-    "sampleName": "12米加强杆装配式基础组合件设备成套装置",
-    "entityCode": null,
-    "planCode": "P202512081029447722",
-    "planStatus": 0,
-    "planStatusName": "待下单",
-    "planProcessStatus": 40,
-    "planProcessStatusName": "预处理",
-    "sampleDeliveryTime": 1765161009253,
-    "sampleDeliveryTimeStr": "2025-12-08 10:30:09",
-    "actualTestStartTime": null,
-    "actualTestStartTimeStr": null,
-    "actualTestEndTime": null,
-    "actualTestEndTimeStr": null,
-    "planOrderTime": null,
-    "planOrderTimeStr": null,
-    "createTime": 1765160984155,
-    "createTimeStr": "2025-12-08 10:29:44",
-    "updateTime": 1765161009275,
-    "updateTimeStr": "2025-12-08 10:30:09",
-    "planProcessStatusTime": 1765161009297,
-    "planProcessStatusTimeStr": "2025-12-08 10:30:09",
-    "testResult": null,
-    "testResultName": "",
-    "materialId": "010076100029",
-    "materialName": "12米加强杆装配式基础组合件设备成套装置",
-    "standardClassifyCode": null,
-    "standardClassifyName": null,
-    "levelOneCode": null,
-    "levelOneName": null,
-    "levelTwoCode": null,
-    "levelTwoName": null,
-    "levelThreeCode": null,
-    "levelThreeName": null,
-    "levelFourCode": null,
-    "levelFourName": null,
-    "lstPlanResult": [
+    "sampleDetectionDetailRespList": [
         {
-            "id": "e1e8493f06154a899232c5a3ac1ffebe",
-            "detectionProjectId": "2BBEB16660534D83B3DCE217963D217A",
-            "detectionProjectCode": "KZSHHKZDLCL01",
-            "detectionProjectName": "空载损耗和空载电流测量",
+            "id": "5EF8496194D44F1BB136EF57A065B02D",
+            "sampleId": "56F243D2AE5243F488CFE354E6E947CA",
+            "sampleCode": "广东-202601083-D-8",
+            "sampleName": "电动滑板车",
+            "entityCode": null,
+            "planCode": "P202601141101313884",
+            "planStatus": 0,
+            "planStatusName": "待下单",
+            "planProcessStatus": 0,
+            "planProcessStatusName": "待送检",
+            "sampleDeliveryTime": null,
+            "sampleDeliveryTimeStr": null,
+            "actualTestStartTime": null,
+            "actualTestStartTimeStr": null,
+            "actualTestEndTime": null,
+            "actualTestEndTimeStr": null,
+            "planOrderTime": null,
+            "planOrderTimeStr": null,
+            "createTime": 1768359691913,
+            "createTimeStr": "2026-01-14 11:01:31",
+            "updateTime": 1768359691913,
+            "updateTimeStr": "2026-01-14 11:01:31",
+            "planProcessStatusTime": null,
+            "planProcessStatusTimeStr": null,
             "testResult": null,
-            "testResultName": null,
-            "lstPlanResultParam": null
-        },
-        {
-            "id": "b6f26784fdf04c1d923ed76ffdddd508",
-            "detectionProjectId": "9076EDF8A60A409ABE85313C4898836C",
-            "detectionProjectCode": "DYBCLHLJZBHJD01",
-            "detectionProjectName": "电压比测量和联结组标号检定",
-            "testResult": null,
-            "testResultName": null,
-            "lstPlanResultParam": null
+            "testResultName": "",
+            "materialId": "210200300000014",
+            "materialName": "电动滑板车",
+            "standardClassifyCode": "2102003",
+            "standardClassifyName": "文体娱乐用品",
+            "levelOneCode": "21",
+            "levelOneName": "办公类用品",
+            "levelTwoCode": "02",
+            "levelTwoName": "办公日用",
+            "levelThreeCode": "003",
+            "levelThreeName": "文体娱乐用品",
+            "levelFourCode": null,
+            "levelFourName": null,
+            "stationId": "C2E1D440353E4DB5BE10BB201EA98BC8",
+            "stationCode": "zhr测试专用",
+            "stationName": "zhr测试专用",
+            "lstPlanResult": [
+                {
+                    "id": "2bbe8778d642422ca899cfc99d2b22ef",
+                    "planId": "5EF8496194D44F1BB136EF57A065B02D",
+                    "detectionProjectId": "JQCZSY05",
+                    "detectionProjectCode": "JQCZSY05",
+                    "detectionProjectName": "10kV真空柱上断路器-机械操作试验",
+                    "testResult": null,
+                    "testResultName": null,
+                    "lstPlanResultParam": [
+                        {
+                            "id": "2db9bdaaf96e42fcb106e336765dbcd1",
+                            "paramCode": "JQCZSY05001",
+                            "paramName": "试验部位",
+                            "standardRequirements": "",
+                            "standardBasis": null,
+                            "testParamValue": null,
+                            "highValue": null,
+                            "lowValue": null
+                        },
+                        {
+                            "id": "2de2942dc1d149d592d722f754c2a4da",
+                            "paramCode": "JQCZSY05002",
+                            "paramName": "试验电压",
+                            "standardRequirements": "",
+                            "standardBasis": null,
+                            "testParamValue": null,
+                            "highValue": null,
+                            "lowValue": null
+                        },
+                        {
+                            "id": "4f684446bb99406c831f4859c6b83a36",
+                            "paramCode": "JQCZSY05003",
+                            "paramName": "试验次数",
+                            "standardRequirements": "",
+                            "standardBasis": null,
+                            "testParamValue": null,
+                            "highValue": null,
+                            "lowValue": null
+                        },
+                        {
+                            "id": "c92c1fb87a7245dba479108137051601",
+                            "paramCode": "JQCZSY05004",
+                            "paramName": "动作次数",
+                            "standardRequirements": "",
+                            "standardBasis": null,
+                            "testParamValue": null,
+                            "highValue": null,
+                            "lowValue": null
+                        }
+                    ]
+                }
+            ]
         }
-    ]
+    ],
+    "listCount": 1
 }
 
 // 工位信息默认数据
@@ -83,7 +124,7 @@ export const DEFAULT_GCGW_DATA = {
 }
 
 // 工位信息 - 兜底测试数据
-export const MOCK_GCGW_DATA = {
+export const MOCK_GCGW_DATA = [{
     id: "222",
     stationCode: "xxx",
     stationName: "批量避雷针检测工位",
@@ -97,7 +138,7 @@ export const MOCK_GCGW_DATA = {
     detectMonthCount: 50,
     detectDayCount: 200,
     innovativeDesign: "",
-}
+}]
 
 // 检测任务列表 - 兜底测试数据
 export const MOCK_JCRW_LIST = [

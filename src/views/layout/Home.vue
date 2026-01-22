@@ -127,6 +127,8 @@ const adjustMenuPosition = () => {
 // 生命周期
 onMounted(() => {
 
+    ue5click()
+
 })
 
 onUnmounted(() => {

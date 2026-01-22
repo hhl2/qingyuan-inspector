@@ -59,7 +59,8 @@ export default {
             OfferToReceive: true,
             WaitForStream: true,
             AutoPlayVideo: true,        // 自动播放视频
-            AutoConnect: true            // 自动连接到信令服务器
+            AutoConnect: true,           // 自动连接
+            StartVideoMuted: true        // 静音启动以符合浏览器自动播放策略
           }
         })
 
@@ -76,11 +77,6 @@ export default {
         applicationInstance = app
         document.body.appendChild(app.rootElement)
 
-        // 监听视频播放
-        document.querySelector('video')?.addEventListener('play', () => {
-          console.log('✅ 视频开始播放')
-          sendMessage({ code: 1, type: 'btn', data: { id: 0 } })
-        })
 
       } catch (error) {
         console.error('PixelStreaming初始化失败:', error)
@@ -151,5 +147,43 @@ body {
   min-height: -webkit-fill-available;
   font-family: 'Montserrat';
   margin: 0;
+}
+
+/* PixelStreaming 容器全屏样式 */
+#centreparent,
+#playerUI,
+.player-root,
+[class*="Application-root"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0 !important;
+}
+
+/* PixelStreaming 内的video元素全屏 */
+#centreparent video,
+#playerUI video,
+.player-root video,
+[class*="Application-root"] video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* 隐藏 PixelStreaming 播放按钮和所有UI控件 */
+#overlay,
+.UiFeature-play,
+.play-overlay,
+button[aria-label="Play"],
+.player-overlay,
+.controls-overlay,
+.pauseOverlay,
+.playOverlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 </style>
