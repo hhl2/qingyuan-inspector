@@ -61,43 +61,76 @@ export const MOCK_FAngZhen = {
                         {
                             "id": "2db9bdaaf96e42fcb106e336765dbcd1",
                             "paramCode": "JQCZSY05001",
-                            "paramName": "试验部位",
-                            "standardRequirements": "",
+                            "paramName": "高压线端全波电压（kV） ",
+                            "standardRequirements": "-7725<=结果值<=-7275 ",
                             "standardBasis": null,
-                            "testParamValue": null,
+                            "testParamValue": 70,
                             "highValue": null,
                             "lowValue": null
                         },
                         {
                             "id": "2de2942dc1d149d592d722f754c2a4da",
                             "paramCode": "JQCZSY05002",
-                            "paramName": "试验电压",
-                            "standardRequirements": "",
+                            "paramName": "高压线端截波电压（kV） ",
+                            "standardRequirements": "≤4330",
                             "standardBasis": null,
-                            "testParamValue": null,
+                            "testParamValue": 4233,
                             "highValue": null,
                             "lowValue": null
                         },
                         {
                             "id": "4f684446bb99406c831f4859c6b83a36",
                             "paramCode": "JQCZSY05003",
-                            "paramName": "试验次数",
-                            "standardRequirements": "",
+                            "paramName": "在降低电压和全电压下的波形图比较应",
+                            "standardRequirements": "-77.25<=结果值<=-72.75",
                             "standardBasis": null,
-                            "testParamValue": null,
+                            "testParamValue": 70,
+                            "highValue": null,
+                            "lowValue": null
+                        },
+
+                    ]
+                },
+                {
+                    "id": "2bbe8778d642422ca899cfc99d2b22ef",
+                    "planId": "5EF8496194D44F1BB136EF57A065B02D",
+                    "detectionProjectId": "JQCZSY05",
+                    "detectionProjectCode": "JQCZSY05",
+                    "detectionProjectName": "10kV真空柱上断路器-机械操作试验2",
+                    "testResult": null,
+                    "testResultName": null,
+                    "lstPlanResultParam": [
+                        {
+                            "id": "2db9bdaaf96e42fcb106e336765dbcd1",
+                            "paramCode": "JQCZSY05001",
+                            "paramName": "高压线端全波电压（kV） ",
+                            "standardRequirements": "-7725<=结果值<=-7275 ",
+                            "standardBasis": null,
+                            "testParamValue": 70,
                             "highValue": null,
                             "lowValue": null
                         },
                         {
-                            "id": "c92c1fb87a7245dba479108137051601",
-                            "paramCode": "JQCZSY05004",
-                            "paramName": "动作次数",
-                            "standardRequirements": "",
+                            "id": "2de2942dc1d149d592d722f754c2a4da",
+                            "paramCode": "JQCZSY05002",
+                            "paramName": "高压线端截波电压（kV） ",
+                            "standardRequirements": "≤4330",
                             "standardBasis": null,
-                            "testParamValue": null,
+                            "testParamValue": 4233,
                             "highValue": null,
                             "lowValue": null
-                        }
+                        },
+                        {
+                            "id": "4f684446bb99406c831f4859c6b83a36",
+                            "paramCode": "JQCZSY05003",
+                            "paramName": "在降低电压和全电压下的波形图比较应",
+                            "standardRequirements": "-77.25<=结果值<=-72.75",
+                            "standardBasis": null,
+                            "testParamValue": 70,
+                            "highValue": null,
+                            "lowValue": null
+                        },
+
                     ]
                 }
             ]

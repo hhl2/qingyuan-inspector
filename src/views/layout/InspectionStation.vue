@@ -337,10 +337,10 @@
       </div>
     </div>
 
-    <div v-if="showMenux" class="context-menu" ref="menuRef">
+    <div v-if="showMenux" class="context-menus" ref="menuRef">
       <div class="context_tans">
-        <div class="sxtmName">
-          <div class="close-popup" @click="closeSingleVideoPopup">×</div>
+        <div class="sxtmNames">
+          <div class="close-popups" @click="closeSingleVideoPopup">×</div>
         </div>
 
         <div class="bjLists">
@@ -350,14 +350,13 @@
               <div>{{ lstPlanResults.sampleCode }}</div>
             </div>
 
-          </div>
-          <div class="bjList">
-
             <div class="bjList_boxs">
               <div class="bjList_box_label">样品名称：</div>
               <div>{{ lstPlanResults.sampleName }}</div>
             </div>
+
           </div>
+
 
           <div class="bjList">
             <div class="bjList_box">
@@ -366,24 +365,24 @@
             </div>
             <div class="bjList_box">
               <div class="bjList_box_label">状态：</div>
-              <div>{{ lstPlanResults.planProcessStatusName }}</div>
+              <div class="bjList_box_text">{{ lstPlanResults.planProcessStatusName }}</div>
             </div>
           </div>
         </div>
 
         <template v-for="(item, index) in lstPlanResults.lstPlanResult" :key="index">
           <div class="bjLists">
-            <div class="bjListx">
-              <div>{{ item.detectionProjectName }}</div>
-              <div>{{ item.testResultName }}</div>
-            </div>
 
-            <div class="auto-scroll-table">
-              <el-table ref="tableRef" :data="item.lstPlanResultParam">
+            <div class="bjLists_title">
+                    <el-tooltip :content="item?.detectionProjectName" effect="light">
+                  <span >{{ item.detectionProjectName  }}</span>
+                </el-tooltip>
+            </div>
+            <div class="auto-scroll-table param-table-wrapper">
+              <el-table class="param-table" ref="tableRef" :data="item.lstPlanResultParam">
                 <el-table-column prop="paramName" label="参数名称" show-overflow-tooltip />
                 <el-table-column prop="standardRequirements" label="标准要求" show-overflow-tooltip />
                 <el-table-column prop="testParamValue" label="实际检测值" />
-
               </el-table>
             </div>
 
@@ -396,6 +395,7 @@
 
       </div>
     </div>
+
   </div>
 </template>
 <script>
@@ -449,23 +449,23 @@ const setVideo = (name) => {
   }
 }
 
-const showMenux = ref(true);
+const showMenux = ref(false);
 
 
 const currentUniqueCode = ref("");
 const lstPlanResults = ref([]);
-const querySampleDetectionDetails = async () => {
+const querySampleDetectionDetails = async (id,codex) => {
   const res = await querySampleDetectionDetail({
-    contractPartId: currentContractPartId.value,
-    uniqueCode: currentStationCode.value,
-    stationCode: currentUniqueCode.value
+    contractPartId:id|| currentContractPartId.value,
+    uniqueCode:codex|| currentStationCodide.value,
+    stationCode:codex|| currentUniqueCode.value
   });
   if (res?.code === 200 && res.data?.sampleDetectionDetailRespList?.length > 0) {
     // 从新的API结构中提取第一个样品的 lstPlanResults
     lstPlanResults.value = res.data.sampleDetectionDetailRespList[0] || [];
   } else {
     // 使用兜底数据
-    lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList?.[0] || [];
+    lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList[0] || [];
   }
 }
 
@@ -671,15 +671,12 @@ watch(ueResponseData, async (newVal, oldVal) => {
     console.log('index页新数据:', newVal.json)
 
     const jsonRes = newVal?.json
+    const id=jsonRes?.id
+    const code=jsonRes?.code
 
     if (jsonRes.type == 'fangzhen') {
-
       showMenux.value = true
-
-      querySampleDetectionDetails()
-
-
-
+      querySampleDetectionDetails(id,code)
     }
 
 
@@ -747,6 +744,19 @@ onUnmounted(() => {
   z-index: 999;
 }
 
+.context-menus {
+  width: 706px;
+  height: 523px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+    /* background: url("@/assets/动画弹窗.png") no-repeat 0 0; */
+  background: url("@/assets/模型弹窗.png") no-repeat 0 0;
+  background-size: 100% 100%;
+  z-index: 999;
+}
+
 .context_tan {
   width: 545px;
   height: 340px;
@@ -758,11 +768,11 @@ onUnmounted(() => {
 }
 
 .context_tans {
-  width: 552px;
+  width: 630px;
   height: 340px;
   background: transparent;
   border: none;
-  margin: 40px 0px 0px 20px;
+  margin: 60px 0px 0px 40px;
   overflow-y: auto;
   border-radius: 4px;
   /* 隐藏滚动条 */
@@ -801,37 +811,84 @@ onUnmounted(() => {
   transform: scale(1.1);
 }
 
+/* 关闭按钮 */
+.close-popups {
+  position: absolute;
+  right: 26px;
+  top: 28px;
+  width: 34px;
+  height: 34px;
+  line-height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 100, 100, 0.8);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-popups:hover {
+  background: rgba(255, 60, 60, 1);
+  transform: scale(1.1);
+}
+
 .bjLists {
-  width: 520px;
+  width: 580px;
   margin: 0px 10px;
-  background: #2a61a0;
-  border: 1px solid #6dbdf1;
+  background: rgba(20, 59, 105, 0.5);
+  border: 1px solid #218BE5;
   display: flex;
   flex-direction: column;
   padding: 8px 10px;
   border-radius: 3px;
-  margin-top: 5px;
+  margin-bottom: 10px;
+
 }
+.bjLists .bjLists_title{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 5px;
+    height: 30px;
+    background: url('@/assets/小标题33.png') no-repeat 0 0;
+    background-size: 100% 100%;
+    position: relative;
+} 
+
+.bjLists .bjLists_title span {
+    color: #E9FBFF;
+    font-size: 14px;
+    font-weight: bold;
+
+}
+
 
 .bjList_box {
   width: 50%;
   display: flex;
   color: #ffffff;
-  font-size: 13px;
+  font-size: 12px;
   margin: 2px 0px;
 }
 
 .bjList_boxs {
   width: 100%;
   display: flex;
-  color: #ffffff;
-  font-size: 13px;
-  margin: 2px 0px;
+  color: #459CFF;
+  font-size: 12px;
+  margin: 4px 0px;
 }
 
 .bjList_box_label {
-  color: #6bbbee;
+  color: #FFFFFF;
   margin-right: 0px;
+}
+
+.bjList_box_text {
+  color: #FFBB45;
 }
 
 .bjList {
@@ -857,5 +914,117 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #6c7a89;
   font-size: 16px;
+}
+
+/* ========== 参数表格独立样式 ========== */
+.param-table-wrapper {
+  margin-top: 0px;
+}
+
+/* 表格整体样式 - 使用 :deep() 穿透 scoped 样式 */
+.param-table-wrapper :deep(.param-table) {
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: transparent;
+  --el-table-header-text-color: #459CFF;
+  --el-table-text-color: #ffffff;
+  --el-table-border-color: transparent;
+  --el-table-row-hover-bg-color: rgba(33, 139, 229, 0.2);
+  font-size: 12px;
+  border: none;
+}
+
+/* 表头样式 */
+.param-table-wrapper :deep(.param-table .el-table__header-wrapper th) {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #459CFF !important;
+  font-family: Microsoft YaHei !important;
+  font-weight: bold !important;
+  font-size: 12px;
+  padding: 8px 0;
+  border: none !important;
+}
+
+/* 覆盖全局 thead tr 背景色 */
+.param-table-wrapper :deep(.param-table thead tr) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 表头单元格内容 */
+.param-table-wrapper :deep(.param-table .el-table__header-wrapper .cell) {
+  font-family: Microsoft YaHei !important;
+  font-weight: bold !important;
+  font-size: 12px;
+  color: #459CFF !important;
+}
+
+/* 表格单元格样式 */
+.param-table-wrapper :deep(.param-table .el-table__body-wrapper td) {
+  background-color: transparent !important;
+  color: #FFFFFF !important;
+  font-family: Microsoft YaHei !important;
+  font-weight: 400 !important;
+  font-size: 12px;
+  padding: 2px 0;
+  border: none !important;
+}
+
+/* 表格单元格内容 */
+.param-table-wrapper :deep(.param-table .el-table__body-wrapper .cell) {
+  font-family: Microsoft YaHei !important;
+  font-weight: 400 !important;
+  font-size: 12px;
+  color: #FFFFFF !important;
+  padding: 0 8px;
+  line-height: 1;
+}
+
+/* 表格行样式 */
+.param-table-wrapper :deep(.param-table .el-table__body-wrapper tr) {
+  background-color: transparent !important;
+  height: 20px;
+}
+
+/* 覆盖全局奇偶行背景色 */
+.param-table-wrapper :deep(.param-table tbody > tr:nth-child(odd)),
+.param-table-wrapper :deep(.param-table tbody > tr:nth-child(even)) {
+  background-color: transparent !important;
+}
+
+/* 表格行悬停效果 */
+.param-table-wrapper :deep(.param-table .el-table__body-wrapper tr:hover > td) {
+  background-color: rgba(33, 139, 229, 0.2) !important;
+}
+
+/* 去除表格所有边框 */
+.param-table-wrapper :deep(.param-table .el-table__inner-wrapper::before),
+.param-table-wrapper :deep(.param-table .el-table__inner-wrapper::after) {
+  display: none;
+}
+
+.param-table-wrapper :deep(.param-table::before),
+.param-table-wrapper :deep(.param-table::after) {
+  display: none;
+}
+
+/* 表格滚动条样式 */
+.param-table-wrapper :deep(.param-table .el-scrollbar__bar.is-vertical) {
+  width: 4px;
+}
+
+.param-table-wrapper :deep(.param-table .el-scrollbar__thumb) {
+  background-color: rgba(33, 139, 229, 0.5);
+  border-radius: 2px;
+}
+
+/* 表格空数据提示 */
+.param-table-wrapper :deep(.param-table .el-table__empty-block) {
+  background-color: transparent !important;
+}
+
+.param-table-wrapper :deep(.param-table .el-table__empty-text) {
+  color: #6c7a89 !important;
 }
 </style>
