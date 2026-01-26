@@ -422,7 +422,7 @@ const emit = defineEmits(['update:isPanelVisible']);
 // ========== 兜底数据开关 ==========
 // true = 使用兜底数据（API无数据时显示测试数据）
 // false = 不使用兜底数据（API无数据时显示空）
-const USE_MOCK_FALLBACK = true;
+const USE_MOCK_FALLBACK = false;
 // ==================================
 
 // 接收从 index 传入的面板状态（支持 v-model）
@@ -454,11 +454,11 @@ const showMenux = ref(false);
 
 const currentUniqueCode = ref("");
 const lstPlanResults = ref([]);
-const querySampleDetectionDetails = async (id,codex) => {
+const querySampleDetectionDetails = async (codex, id) => {
   const res = await querySampleDetectionDetail({
-    contractPartId:id|| currentContractPartId.value,
-    uniqueCode:codex|| currentStationCodide.value,
-    stationCode:codex|| currentUniqueCode.value
+    contractPartId: id || currentContractPartId.value,
+    uniqueCode: codex || currentStationCode.value,
+    stationCode: codex || currentUniqueCode.value
   });
   if (res?.code === 200 && res.data?.sampleDetectionDetailRespList?.length > 0) {
     // 从新的API结构中提取第一个样品的 lstPlanResults
@@ -671,12 +671,18 @@ watch(ueResponseData, async (newVal, oldVal) => {
     console.log('index页新数据:', newVal.json)
 
     const jsonRes = newVal?.json
-    const id=jsonRes?.id
-    const code=jsonRes?.code
+
 
     if (jsonRes.type == 'fangzhen') {
+
+      console.log(jsonRes, 'jsonRes', currentContractPartId.value, 2222)
+
       showMenux.value = true
-      querySampleDetectionDetails(id,code)
+
+      querySampleDetectionDetails(jsonRes?.code, jsonRes?.id)
+
+
+
     }
 
 
