@@ -374,9 +374,9 @@
           <div class="bjLists">
 
             <div class="bjLists_title">
-                    <el-tooltip :content="item?.detectionProjectName" effect="light">
-                  <span >{{ item.detectionProjectName  }}</span>
-                </el-tooltip>
+              <el-tooltip :content="item?.detectionProjectName" effect="light">
+                <span>{{ item.detectionProjectName }}</span>
+              </el-tooltip>
             </div>
             <div class="auto-scroll-table param-table-wrapper">
               <el-table class="param-table" ref="tableRef" :data="item.lstPlanResultParam">
@@ -508,7 +508,19 @@ const getjcgwList = async () => {
     });
     if (response?.code === 200 && response.data) {
 
-      gcgwList.value = response.data.stationInfoRespDTOList[0] || [];
+      const list = response.data.stationInfoRespDTOList;
+      if (list && list.length > 0) {
+        // 取第一个对象作为基础数据
+        gcgwList.value = { ...list[0] };
+
+        // 如果有多个对象，累加所有对象的统计数据
+        if (list.length > 1) {
+          gcgwList.value.detectCount = list.reduce((sum, item) => sum + Number(item.detectCount || 0), 0);
+          gcgwList.value.detectMonthCount = list.reduce((sum, item) => sum + Number(item.detectMonthCount || 0), 0);
+          gcgwList.value.detectDayCount = list.reduce((sum, item) => sum + Number(item.detectDayCount || 0), 0);
+          gcgwList.value.detectYearCount = list.reduce((sum, item) => sum + Number(item.detectYearCount || 0), 0);
+        }
+      }
     } else if (USE_MOCK_FALLBACK) {
       gcgwList.value = { ...MOCK_GCGW_DATA[0] };
     }
@@ -757,7 +769,7 @@ onUnmounted(() => {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-    /* background: url("@/assets/动画弹窗.png") no-repeat 0 0; */
+  /* background: url("@/assets/动画弹窗.png") no-repeat 0 0; */
   background: url("@/assets/模型弹窗.png") no-repeat 0 0;
   background-size: 100% 100%;
   z-index: 999;
@@ -853,21 +865,22 @@ onUnmounted(() => {
   margin-bottom: 10px;
 
 }
-.bjLists .bjLists_title{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3px 5px;
-    height: 30px;
-    background: url('@/assets/小标题33.png') no-repeat 0 0;
-    background-size: 100% 100%;
-    position: relative;
-} 
+
+.bjLists .bjLists_title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 5px;
+  height: 30px;
+  background: url('@/assets/小标题33.png') no-repeat 0 0;
+  background-size: 100% 100%;
+  position: relative;
+}
 
 .bjLists .bjLists_title span {
-    color: #E9FBFF;
-    font-size: 14px;
-    font-weight: bold;
+  color: #E9FBFF;
+  font-size: 14px;
+  font-weight: bold;
 
 }
 

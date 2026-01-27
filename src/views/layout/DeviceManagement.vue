@@ -41,12 +41,13 @@
     </div>
   </div>
   <div v-if="showMenus" class="context-menu" ref="menuRef">
+    <div class="close-popups" @click="closeMenus">×</div>
     <div class="context_tan">
-      <div class="yiqiName" @click="closeMenus()">
-        仪器名称
-        <div class="bjBack">
-          <img src="@/assets/圆角矩形.png" alt="" />
-        </div>
+      <div class="yiqiName">
+        <!-- {{ sbxqList?.equipmentName || "仪器名称" }} -->
+
+
+
       </div>
       <div class="xbts">
         <img src="@/assets/xbt.png" />
@@ -295,9 +296,38 @@
   font-weight: bold;
   font-size: 16px;
   color: #61b3ff;
-  margin-left: 55px;
+  margin-left: 25px;
   position: relative;
   cursor: pointer;
+  z-index: 9999;
+  margin-bottom: 5px;
+}
+
+/* 关闭按钮 */
+.close-popups {
+  position: absolute;
+  right: 28px;
+  top: 40px;
+  width: 34px;
+  height: 34px;
+  line-height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 100, 100, 0.8);
+  color: #fff;
+  /* 覆盖父元素的透明文字填充，确保关闭按钮文字可见 */
+  -webkit-text-fill-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 9999;
+}
+
+.close-popups:hover {
+  background: rgba(255, 60, 60, 1);
+  transform: scale(1.1);
 }
 
 .yiqiName .bjBack {
@@ -436,6 +466,8 @@
     opacity: 0.5;
   }
 }
+
+
 
 /* 关闭按钮 */
 .close-popup {
@@ -855,8 +887,7 @@ const currentStationCode = ref("");
 const showMenus = ref(false);
 const showSingleVideoPopup = ref(false);  // 单画面弹窗
 const isLoadingVideo = ref(false); // 视频加载状态
-const menuRef = ref(null);
-const menuRefSingle = ref(null);
+
 const input3 = ref("");
 
 // EasyPlayer 播放器相关引用（与 type3.vue 一致）
@@ -1163,11 +1194,11 @@ const handleRowClick = async (row) => {
   console.log(row, "设备详情");
 
   // 1. 打开视频弹窗 (与 type3.vue 一致)
-  await fetchCameraVideoAndOpenPopup(
-    row.id,
-    row.equipmentName || row.countName || '摄像头',
-    'online'
-  );
+  // await fetchCameraVideoAndOpenPopup(
+  //   row.id,
+  //   row.equipmentName || row.countName || '摄像头',
+  //   'online'
+  // );
 
   // 2. 获取设备详细信息并在侧边详情面板显示
   if (row.id) {
@@ -1179,15 +1210,6 @@ const handleRowClick = async (row) => {
 };
 // 设备列表详情 - 使用 mock 文件中的默认数据
 const sbxqList = ref({ ...DEFAULT_DEVICE_DETAIL });
-const formatDate = (timestamp) => {
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-}
-
 const getsbxqList = async (id) => {
   if (!id) return;
   const searchParams = {

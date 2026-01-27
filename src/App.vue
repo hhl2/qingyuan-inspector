@@ -12,8 +12,8 @@ import { Application, PixelStreamingApplicationStyle } from '@epicgames-ps/lib-p
 // 默认配置
 const DEFAULT_CONFIG = {
   pixelStreaming: {
-    websocketURL: 'ws://192.168.31.143:88',
-    ss: 'ws://192.168.31.143:88'
+    websocketURL: 'ws://10.151.223.209:99',
+    ss: 'ws://10.151.223.209:99'
   }
 }
 

@@ -258,10 +258,9 @@ watch(ueResponseData, async (newVal, oldVal) => {
 
         const jsonRes = newVal?.json
 
-        if (jsonRes && jsonRes.type === 'JCZX') {
+        if (jsonRes.id === 'JCZX' || jsonRes.type === 'JCZX') {
             console.log('打开检测中心:', jsonRes)
             localStorage.setItem('roadinfo', JSON.stringify(jsonRes))
-
             nextTick(() => {
                 changli.value = 0
                 router.push('/kb')

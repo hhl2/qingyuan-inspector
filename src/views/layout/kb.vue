@@ -1,22 +1,10 @@
 <template>
-
   <div>
-
-    <!-- <iframe ref="streamIframe" class="pixel-streaming-iframe"
-      src="http://192.168.31.37:8083/?ss=ws://192.168.31.143:88&HoveringMouse=true/#/PixelStreamingIframe"
-      frameborder="0" />
-
-    <div class="left"></div>
-    <div class="right"></div> -->
-
-
   </div>
 </template>
 <script setup>
 import { onMounted, ref, watch, inject, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-
-
 /* 触发ue5 */
 // 注入父组件提供的方法
 const playerMethods = inject('playerMethods')
@@ -38,14 +26,14 @@ const ueResponseData = inject('ueResponseData')
 watch(ueResponseData, async (newVal, oldVal) => {
   if (newVal) {
     console.log('接收到新数据:', newVal)
-    // const jsonRes = newVal?.json
-    // if (jsonRes && jsonRes.type === 'JCGW') {
-    //   console.log('打开检测工位:', jsonRes)
-    //   localStorage.setItem('roadinfo', JSON.stringify(jsonRes))
-    //   nextTick(() => {
-    //     router.push('/inspection')
-    //   })
-    // }
+    const jsonRes = newVal?.json
+    if (jsonRes && jsonRes.type === 'JCGW') {
+      console.log('打开检测工位:', jsonRes)
+      localStorage.setItem('roadinfo', JSON.stringify(jsonRes))
+      nextTick(() => {
+        router.push('/inspection')
+      })
+    }
 
   }
 })
