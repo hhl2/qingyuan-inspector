@@ -13,9 +13,11 @@
             <div class="play-icon"></div>
           </div>
         </div>
+         <el-tooltip style="width: 50%;" :content="gcgwList?.stationIntroduction" effect="light">
         <div class="jcgw">
           <span>{{ gcgwList?.stationIntroduction }}</span>
         </div>
+        </el-tooltip>
         <div class="xbt">
           <img src="@/assets/xbt.png" />
           <div class="xbt_text">工位状态</div>
@@ -30,9 +32,13 @@
           </div>
           <div class="gwxx_box">
             <span class="gwxx_label">仪&nbsp;器&nbsp;设&nbsp;备&nbsp;:&nbsp;</span>
-            <div class="gwxx_text">
+
+                     <el-tooltip style="width: 50%;" :content="gcgwList?.equipmentName" effect="light">
+                             <div class="gwxx_text">
               {{ gcgwList?.equipmentName }}
             </div>
+                     </el-tooltip>
+     
           </div>
         </div>
 
@@ -41,7 +47,7 @@
           <div class="xbt_text">检测能力</div>
         </div>
 
-        <el-tooltip :content="gcgwList?.detectItemName" effect="light">
+        <el-tooltip style="width: 50%;" :content="gcgwList?.detectItemName" effect="light">
           <div class="jcnl"> {{ gcgwList?.detectItemName }}</div>
         </el-tooltip>
 
@@ -456,16 +462,17 @@ const currentUniqueCode = ref("");
 const lstPlanResults = ref([]);
 const querySampleDetectionDetails = async (codex, id) => {
   const res = await querySampleDetectionDetail({
-    contractPartId: id || currentContractPartId.value,
-    uniqueCode: codex || currentStationCode.value,
+    contractPartId: '1339149F529E4A228774E2B05FA97307',
+    uniqueCode: id ||'',
     stationCode: codex || currentUniqueCode.value
   });
   if (res?.code === 200 && res.data?.sampleDetectionDetailRespList?.length > 0) {
     // 从新的API结构中提取第一个样品的 lstPlanResults
     lstPlanResults.value = res.data.sampleDetectionDetailRespList[0] || [];
   } else {
+    lstPlanResults.value = [] 
     // 使用兜底数据
-    lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList[0] || [];
+    // lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList[0] || [];
   }
 }
 
@@ -503,7 +510,7 @@ const getjcgwList = async () => {
   }
   try {
     const response = await queryDetectStationInfo({
-      contractPartId: currentContractPartId.value,
+      contractPartId:'1339149F529E4A228774E2B05FA97307',
       stationCode: currentStationCode.value,
     });
     if (response?.code === 200 && response.data) {
@@ -541,8 +548,8 @@ const getjcgwxqList = async (id) => {
   try {
     const response = await queryDetectPlanInfoListPage({
       taskId: id || "",
-      contractPartId: currentContractPartId.value,
-      stationCode: currentStationCode.value,
+      contractPartId:'1339149F529E4A228774E2B05FA97307',
+      stationCode:  currentStationCode.value,
       queryType: changpd.value,
     });
     if (response?.code === 200 && response.data?.list?.length > 0) {
@@ -566,7 +573,8 @@ const getjcrwList = async () => {
   }
   try {
     const response = await queryDetectTaskListPage({
-      contractPartId: currentContractPartId.value,
+       contractPartId:'1339149F529E4A228774E2B05FA97307',
+      // contractPartId: currentContractPartId.value,
       stationCode: currentStationCode.value,
       queryType: changpd.value,
     });
@@ -660,7 +668,9 @@ const initializeStationData = () => {
     gcgwList.value.stationName = parsed.name || defaultStationName;
     videoName.value = parsed.name || defaultStationName;
     defaultStationNames.value = parsed.name || defaultStationName;
-    currentContractPartId.value = parsed.id || '';
+    // currentContractPartId.value = parsed.id || ''
+    //  contractPartId:'1339149F529E4A228774E2B05FA97307',
+    
     currentStationCode.value = parsed.station_code || '';
 
     setVideo(videoName.value);

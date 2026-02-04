@@ -26,14 +26,14 @@
       <el-table class="my-spacing-table" ref="tableRef" :data="sblist" @mouseenter="pauseScroll"
         @mouseleave="resumeScroll" @row-click="handleRowClick">
         <el-table-column type="index" label="序号" width="50" />
-        <el-table-column prop="equipmentName" label="设备名称" />
-        <el-table-column prop="equipmentKindName" label="设备类型" />
+        <el-table-column prop="equipmentName" label="设备名称"  show-overflow-tooltip />
+        <el-table-column prop="equipmentKindName" label="设备类型"  show-overflow-tooltip />
         <el-table-column prop="equipmentMonitoringPoint" label="监测点位置" class="setwidth" show-overflow-tooltip />
-        <el-table-column prop="countName" label="状态" width="50">
+        <el-table-column prop="equipmentStatusName" label="状态" width="50">
           <template #default="scope">
             <span>
 
-              {{ scope.row.countName }}
+              {{ scope.row.equipmentStatusName }}
             </span>
           </template>
         </el-table-column>
@@ -868,7 +868,7 @@ import {
 // ========== 兜底数据开关 ==========
 // true = 使用兜底数据（API无数据时显示测试数据）
 // false = 不使用兜底数据（API无数据时显示空）
-const USE_MOCK_FALLBACK = true;
+const USE_MOCK_FALLBACK = false;
 // ==================================
 
 // 接收从 index 传入的面板状态
@@ -880,7 +880,7 @@ const props = defineProps({
 })
 
 // 动态存储参数（从 localStorage 获取）
-const currentContractPartId = ref("");
+const currentContractPartId = ref("1339149F529E4A228774E2B05FA97307");
 const currentStationCode = ref("");
 
 
@@ -1118,6 +1118,9 @@ const getsbList = async () => {
       sblist.value = res.data.list;
     } else if (USE_MOCK_FALLBACK) {
       sblist.value = [...MOCK_DEVICE_LIST];
+    }else{
+      sblist.value=[];
+
     }
   } catch (error) {
     console.error('获取设备列表失败:', error);
@@ -1278,7 +1281,7 @@ onMounted(() => {
     try {
       const parsed = JSON.parse(roadinfo)
       if (parsed) {
-        currentContractPartId.value = parsed?.id || ''
+        // currentContractPartId.value = parsed?.id || ''
         currentStationCode.value = parsed?.station_code || ''
       }
     } catch (error) {

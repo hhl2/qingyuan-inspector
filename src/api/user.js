@@ -3,7 +3,7 @@ import request from '@/utils/request';
 
 export const querySampleDetectionDetail = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/querySampleDetectionDetail',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/querySampleDetectionDetail',
     method: 'post',
     data
   });
@@ -13,14 +13,14 @@ export const querySampleDetectionDetail = (data) =>
 // 获取检测工位-工位信息
 export const queryDetectStationInfo = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryDetectStationInfo',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryDetectStationInfo',
     method: 'post',
     data
   });
 //检测任务列表
 export const queryDetectTaskListPage = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryDetectTaskListPage',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryDetectTaskListPage',
     method: 'post',
     data
   });
@@ -28,7 +28,7 @@ export const queryDetectTaskListPage = (data) =>
 //检测查询检测详情
 export const queryDetectPlanInfoListPage = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryDetectPlanInfoListPage',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryDetectPlanInfoListPage',
     method: 'post',
     data
   });
@@ -37,21 +37,21 @@ export const queryDetectPlanInfoListPage = (data) =>
 //告警统计
 export const queryAlarmInfoStatistics = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryAlarmInfoStatistics',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryAlarmInfoStatistics',
     method: 'post',
     data
   });
 //告警列表（详情从列表中获取）
 export const queryAlarmInfoListPage = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryAlarmInfoListPage',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryAlarmInfoListPage',
     method: 'post',
     data
   });
 //设备统计
 export const queryEquipmentStatistics = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryEquipmentStatistics',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryEquipmentStatistics',
     method: 'post',
     data
   });
@@ -59,7 +59,7 @@ export const queryEquipmentStatistics = (data) =>
 
 export const queryEquipmentListPage = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryEquipmentListPage',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryEquipmentListPage',
     method: 'post',
     data
   });
@@ -68,7 +68,7 @@ export const queryEquipmentListPage = (data) =>
 //分页查询送检信息
 export const queryEquipmentDeliveryListPage = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryEquipmentDeliveryListPage',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryEquipmentDeliveryListPage',
     method: 'post',
     data
   });
@@ -77,7 +77,7 @@ export const queryEquipmentDeliveryListPage = (data) =>
 //查询设备详情
 export const queryEquipmentDetail = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryEquipmentDetail',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryEquipmentDetail',
     method: 'post',
     data
   });
@@ -86,7 +86,7 @@ export const queryEquipmentDetail = (data) =>
 //查询维修信息
 export const queryEquipmentMaintenanceListPage = (data) =>
   request({
-    url: '/gmp/mm/qcdataanalysis/thirdPartyDigitalTwin/queryEquipmentMaintenanceListPage',
+    url: '/gmp/mm/qcdataanalysis/digital/thirdPartyDigitalTwin/queryEquipmentMaintenanceListPage',
     method: 'post',
     data
   });

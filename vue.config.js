@@ -54,18 +54,22 @@ module.exports = defineConfig({
     },
 
     proxy: {
-      '/api': {
-        target: 'http://10.151.223.230:8081',
+      // Token API - 保留 /api/jadp 前缀
+      '/api/jadp': {
+        target: 'http://10.151.223.230:8010',
         changeOrigin: true,
         secure: false,
-        pathRewrite: {
-          '^/api/jadp': '/api/jadp',
-          '^/api': ''
-        }
+        // 不需要pathRewrite，直接转发
       },
-      // 203服务器代理 - 用于视频相关接口
+      // 业务API - 直接代理到230服务器
+      '/gmp': {
+        target: 'http://10.151.223.230:8010',
+        changeOrigin: true,
+        secure: false,
+      },
+      // 视频相关API - 203服务器
       '/api203': {
-        target: 'http://10.151.223.203:8081',
+        target: 'http://10.151.223.203:8010',
         changeOrigin: true,
         secure: false,
         pathRewrite: {

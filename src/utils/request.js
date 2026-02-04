@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 
 // 基础配置
 const baseConfig = {
-  baseURL: 'api', // 改为你的实际API域名
+  baseURL: '', // 业务API不需要前缀，token API已在token.js中指定完整路径
   // baseUrl:"http://10.151.223.230:8081",
   timeout: 15000,
   headers: {
@@ -120,16 +120,16 @@ serviceWithToken.interceptors.request.use(
 
     // 排除token获取接口本身
     if (!config.url.includes('/auth/session/thirdSystem')) {
-      let token = getStoredToken();
+      let token = null;
 
-      if (!token && !isRefreshing) {
-        try {
-          console.log('首次获取token...');
-          token = await getToken();
-        } catch (error) {
-          console.error('初始获取token失败:', error);
-          // 不reject，继续请求，让后端返回401
-        }
+      // 每次调用API前都重新获取token
+      try {
+        console.log('正在获取最新token...');
+        token = await getToken();
+        console.log('token获取成功');
+      } catch (error) {
+        console.error('获取token失败:', error);
+        // 不reject，继续请求，让后端返回401
       }
 
       if (token) {

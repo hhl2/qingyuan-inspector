@@ -30,7 +30,7 @@ export default {
     // ========== 配置加载 ==========
     const loadConfig = async () => {
       try {
-        const res = await fetch('/config.json')
+        const res = await fetch('/jc/config.json')
         return res.ok ? await res.json() : DEFAULT_CONFIG
       } catch {
         console.error('加载配置失败，使用默认配置')

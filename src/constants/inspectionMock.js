@@ -293,7 +293,7 @@ export const MOCK_JCRWXQ_LIST = [
 
 // 视频路径映射
 export const getVideoBasePath = () => {
-    return process.env.NODE_ENV === 'production' ? '../external-videos/' : '/external-videos/'
+    return '/external-videos/'
 }
 
 // export const VIDEO_NAME_MAP = {

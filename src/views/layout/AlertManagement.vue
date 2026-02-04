@@ -85,7 +85,7 @@ import { DEFAULT_ALERT_STATS, DEFAULT_ALERT_LIST, MOCK_ALERT_STATS, MOCK_ALERT_L
 // ========== 兜底数据开关 ==========
 // true = 使用兜底数据（API无数据时显示测试数据）
 // false = 不使用兜底数据（API无数据时显示空）
-const USE_MOCK_FALLBACK = true;
+const USE_MOCK_FALLBACK = false;
 // ==================================
 
 // 接收从 index 传入的面板状态
@@ -100,7 +100,7 @@ const showMenus = ref(false);
 const menuRef = ref(null);
 
 // 动态存储参数（可从 roadinfo 获取）
-const currentContractPartId = ref("");
+const currentContractPartId = ref("1339149F529E4A228774E2B05FA97307");
 const currentStationCode = ref("");
 
 const ueResponseData = inject('ueResponseData')
@@ -140,6 +140,8 @@ const getgjtjList = async () => {
       gjtjList.value = response.data;
     } else if (USE_MOCK_FALLBACK) {
       gjtjList.value = [...MOCK_ALERT_STATS];
+    }else{
+       gjtjList.value=[]
     }
   } catch (error) {
     console.error('获取告警统计失败:', error);
@@ -162,6 +164,8 @@ const getgjtjdataList = async () => {
       gjtjdata.value = response.data.list;
     } else if (USE_MOCK_FALLBACK) {
       gjtjdata.value = [...MOCK_ALERT_LIST];
+    }else{
+            gjtjdata.value =[];
     }
   } catch (error) {
     console.error('获取告警列表失败:', error);
@@ -210,7 +214,7 @@ onMounted(() => {
     try {
       const parsed = JSON.parse(roadinfo)
       if (parsed) {
-        currentContractPartId.value = parsed?.id || ''
+        // currentContractPartId.value = parsed?.id || ''
         currentStationCode.value = parsed?.station_code || ''
 
         // 始终调用，函数内部会处理兜底逻辑
