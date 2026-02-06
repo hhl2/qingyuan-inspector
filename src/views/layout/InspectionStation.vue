@@ -13,11 +13,15 @@
             <div class="play-icon"></div>
           </div>
         </div>
-         <el-tooltip style="width: 50%;" :content="gcgwList?.stationIntroduction" effect="light">
-        <div class="jcgw">
-          <span>{{ gcgwList?.stationIntroduction }}</span>
+        <div class="jcgw-container" style="width: 100%;">
+          <div class="jcgw" :class="{ collapsed: !isIntroExpanded }" ref="introContent">
+            <span>{{ gcgwList?.stationIntroduction }}</span>
+            <div v-if="showIntroToggle" class="toggle-btn" @click="isIntroExpanded = !isIntroExpanded">
+              {{ isIntroExpanded ? '收起' : '展开' }}
+              <i :class="isIntroExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"></i>
+            </div>
+          </div>
         </div>
-        </el-tooltip>
         <div class="xbt">
           <img src="@/assets/xbt.png" />
           <div class="xbt_text">工位状态</div>
@@ -428,7 +432,7 @@ const emit = defineEmits(['update:isPanelVisible']);
 // ========== 兜底数据开关 ==========
 // true = 使用兜底数据（API无数据时显示测试数据）
 // false = 不使用兜底数据（API无数据时显示空）
-const USE_MOCK_FALLBACK = false;
+const USE_MOCK_FALLBACK = true;
 // ==================================
 
 // 接收从 index 传入的面板状态（支持 v-model）
@@ -493,6 +497,24 @@ const icon1Class = computed(() => iconStates.value[0] ? "blue_icon" : "red_icon"
 const icon2Class = computed(() => iconStates.value[1] ? "blue_icon" : "red_icon");
 const icon3Class = computed(() => iconStates.value[2] ? "blue_icon" : "red_icon");
 
+// 工位简介展开/收起功能
+const isIntroExpanded = ref(false);
+const showIntroToggle = ref(false);
+const introContent = ref(null);
+
+const checkIntroOverflow = () => {
+  nextTick(() => {
+    const el = introContent.value;
+    if (el) {
+      const span = el.querySelector('span');
+      if (span) {
+        // 检查内容是否超出2行高度(假设每行约30px)
+        showIntroToggle.value = span.scrollHeight > 60;
+      }
+    }
+  });
+};
+
 // 工位信息 - 初始化为空对象
 const gcgwList = ref({ ...DEFAULT_GCGW_DATA });
 
@@ -535,6 +557,8 @@ const getjcgwList = async () => {
     console.error('获取工位信息失败:', error);
     if (USE_MOCK_FALLBACK) gcgwList.value = { ...MOCK_GCGW_DATA[0] };
   }
+  // 数据更新后重新检查溢出
+  checkIntroOverflow();
 };
 
 // 检测任务详情列表 - 初始化为空数组
@@ -741,10 +765,12 @@ onMounted(() => {
     emit('update:isPanelVisible', false);
   }
 
-  // 统一调用 API（内部会根据 stationCode 决定是否使用兜底数据）
+  // 统一调用 API(内部会根据 stationCode 决定是否使用兜底数据)
   getjcgwList();
   getjcrwList();
 
+  // 检查工位简介是否需要展开/收起按钮
+  checkIntroOverflow();
 
   // 使用新的数据结构初始化
   lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList?.[0] || [];
@@ -1055,5 +1081,65 @@ onUnmounted(() => {
 
 .param-table-wrapper :deep(.param-table .el-table__empty-text) {
   color: #6c7a89 !important;
+}
+
+/* 工位简介展开/收起样式 */
+.jcgw-container {
+  position: relative;
+}
+
+.jcgw {
+  position: relative;
+  line-height: 1.5;
+  padding-bottom: 25px; /* 为按钮留出空间 */
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.jcgw.collapsed {
+  max-height: 60px; /* 2行的高度,根据实际行高调整 */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  transition: max-height 0.3s ease;
+}
+
+/* 展开状态 - 移除所有限制 */
+.jcgw:not(.collapsed) {
+  max-height: none;
+  overflow: visible; /* 关键:允许内容完全显示 */
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  -webkit-box-orient: unset;
+}
+
+.toggle-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  color: #409EFF;
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 8px;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+.toggle-btn:hover {
+  color: #66b1ff;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.toggle-btn i {
+  font-size: 12px;
+  transition: transform 0.3s ease;
 }
 </style>
