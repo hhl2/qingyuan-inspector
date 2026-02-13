@@ -37,12 +37,12 @@
           <div class="gwxx_box">
             <span class="gwxx_label">仪&nbsp;器&nbsp;设&nbsp;备&nbsp;:&nbsp;</span>
 
-                     <el-tooltip style="width: 50%;" :content="gcgwList?.equipmentName" effect="light">
-                             <div class="gwxx_text">
-              {{ gcgwList?.equipmentName }}
-            </div>
-                     </el-tooltip>
-     
+            <el-tooltip style="width: 50%;" :content="gcgwList?.equipmentName" effect="light">
+              <div class="gwxx_text">
+                {{ gcgwList?.equipmentName }}
+              </div>
+            </el-tooltip>
+
           </div>
         </div>
 
@@ -91,12 +91,12 @@
 
         <div class="xbt">
           <img src="@/assets/xbt.png" />
-          <div class="xbt_text">创新设计</div>
+          <div class="xbt_text">创新应用</div>
         </div>
         <div class="cxsj">
           <span> {{ gcgwList?.innovativeDesign }}</span>
         </div>
-        <div class="xbt">
+        <!-- <div class="xbt">
           <img src="@/assets/xbt.png" />
           <div class="xbt_text">数据同步</div>
         </div>
@@ -123,7 +123,7 @@
               <span>已同步</span>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -467,14 +467,14 @@ const lstPlanResults = ref([]);
 const querySampleDetectionDetails = async (codex, id) => {
   const res = await querySampleDetectionDetail({
     contractPartId: '1339149F529E4A228774E2B05FA97307',
-    uniqueCode: id ||'',
+    uniqueCode: id || '',
     stationCode: codex || currentUniqueCode.value
   });
   if (res?.code === 200 && res.data?.sampleDetectionDetailRespList?.length > 0) {
     // 从新的API结构中提取第一个样品的 lstPlanResults
     lstPlanResults.value = res.data.sampleDetectionDetailRespList[0] || [];
   } else {
-    lstPlanResults.value = [] 
+    lstPlanResults.value = []
     // 使用兜底数据
     // lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList[0] || [];
   }
@@ -505,13 +505,26 @@ const introContent = ref(null);
 const checkIntroOverflow = () => {
   nextTick(() => {
     const el = introContent.value;
-    if (el) {
-      const span = el.querySelector('span');
-      if (span) {
-        // 检查内容是否超出2行高度(假设每行约30px)
-        showIntroToggle.value = span.scrollHeight > 60;
+    if (!el) return;
+
+    // 临时展开以获取实际内容高度
+    const wasExpanded = isIntroExpanded.value;
+    isIntroExpanded.value = true;
+
+    nextTick(() => {
+      // 检查内容高度是否超出容器的固定高度
+      // scrollHeight是内容的实际高度，clientHeight是容器的可见高度
+      const contentHeight = el.scrollHeight;
+      const containerHeight = 60; // 容器的固定高度（收起时）
+
+      // 如果内容高度超过容器高度，显示展开/收起按钮
+      showIntroToggle.value = contentHeight > containerHeight;
+
+      // 恢复之前的展开/收起状态
+      if (!wasExpanded) {
+        isIntroExpanded.value = false;
       }
-    }
+    });
   });
 };
 
@@ -532,7 +545,7 @@ const getjcgwList = async () => {
   }
   try {
     const response = await queryDetectStationInfo({
-      contractPartId:'1339149F529E4A228774E2B05FA97307',
+      contractPartId: '1339149F529E4A228774E2B05FA97307',
       stationCode: currentStationCode.value,
     });
     if (response?.code === 200 && response.data) {
@@ -558,7 +571,7 @@ const getjcgwList = async () => {
     if (USE_MOCK_FALLBACK) gcgwList.value = { ...MOCK_GCGW_DATA[0] };
   }
   // 数据更新后重新检查溢出
-  checkIntroOverflow();
+  setTimeout(() => checkIntroOverflow(), 100);
 };
 
 // 检测任务详情列表 - 初始化为空数组
@@ -572,8 +585,8 @@ const getjcgwxqList = async (id) => {
   try {
     const response = await queryDetectPlanInfoListPage({
       taskId: id || "",
-      contractPartId:'1339149F529E4A228774E2B05FA97307',
-      stationCode:  currentStationCode.value,
+      contractPartId: '1339149F529E4A228774E2B05FA97307',
+      stationCode: currentStationCode.value,
       queryType: changpd.value,
     });
     if (response?.code === 200 && response.data?.list?.length > 0) {
@@ -597,7 +610,7 @@ const getjcrwList = async () => {
   }
   try {
     const response = await queryDetectTaskListPage({
-       contractPartId:'1339149F529E4A228774E2B05FA97307',
+      contractPartId: '1339149F529E4A228774E2B05FA97307',
       // contractPartId: currentContractPartId.value,
       stationCode: currentStationCode.value,
       queryType: changpd.value,
@@ -694,7 +707,7 @@ const initializeStationData = () => {
     defaultStationNames.value = parsed.name || defaultStationName;
     // currentContractPartId.value = parsed.id || ''
     //  contractPartId:'1339149F529E4A228774E2B05FA97307',
-    
+
     currentStationCode.value = parsed.station_code || '';
 
     setVideo(videoName.value);
@@ -769,8 +782,11 @@ onMounted(() => {
   getjcgwList();
   getjcrwList();
 
-  // 检查工位简介是否需要展开/收起按钮
-  checkIntroOverflow();
+  // 检查工位简介是否需要展开/收起按钮（延迟执行以确保 DOM 已更新）
+  setTimeout(() => checkIntroOverflow(), 100);
+
+  // 监听窗口大小变化，重新检查溢出
+  window.addEventListener('resize', checkIntroOverflow);
 
   // 使用新的数据结构初始化
   lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList?.[0] || [];
@@ -778,6 +794,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener('resize', checkIntroOverflow);
 });
 </script>
 
@@ -1081,65 +1098,5 @@ onUnmounted(() => {
 
 .param-table-wrapper :deep(.param-table .el-table__empty-text) {
   color: #6c7a89 !important;
-}
-
-/* 工位简介展开/收起样式 */
-.jcgw-container {
-  position: relative;
-}
-
-.jcgw {
-  position: relative;
-  line-height: 1.5;
-  padding-bottom: 25px; /* 为按钮留出空间 */
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.jcgw.collapsed {
-  max-height: 60px; /* 2行的高度,根据实际行高调整 */
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  transition: max-height 0.3s ease;
-}
-
-/* 展开状态 - 移除所有限制 */
-.jcgw:not(.collapsed) {
-  max-height: none;
-  overflow: visible; /* 关键:允许内容完全显示 */
-  display: block;
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-  -webkit-box-orient: unset;
-}
-
-.toggle-btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  color: #409EFF;
-  cursor: pointer;
-  font-size: 12px;
-  user-select: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 2px 8px;
-  border-radius: 4px;
-  z-index: 10;
-}
-
-.toggle-btn:hover {
-  color: #66b1ff;
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.toggle-btn i {
-  font-size: 12px;
-  transition: transform 0.3s ease;
 }
 </style>
