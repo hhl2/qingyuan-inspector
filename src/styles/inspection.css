@@ -90,7 +90,7 @@
 .toggle-btn {
     position: absolute;
     bottom: 0;
-    right: 0;
+    right: 0px;
     color: #409EFF;
     cursor: pointer;
     font-size: 12px;
@@ -98,7 +98,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
     padding: 2px 8px;
     border-radius: 4px 0px 0px 0px;
     z-index: 10;
@@ -106,7 +106,7 @@
 
 .toggle-btn:hover {
     color: #66b1ff;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .toggle-btn i {
@@ -166,17 +166,37 @@
     -webkit-text-fill-color: transparent;
 }
 
+/* 检测能力容器 */
+.jcnl-container {
+    position: relative;
+    width: 100%;
+}
+
 .jcnl {
     color: #AFD8FA;
     font-size: 11px;
     margin: 0px 15px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    height: 30px;
+    position: relative;
+    word-wrap: break-word;
+    word-break: break-word;
+    transition: all 0.3s ease-in-out;
+}
 
+.jcnl span {
+    display: block;
+    line-height: 18px;
+}
+
+/* 收起状态 */
+.jcnl.collapsed {
+    height: 40px;
+    overflow: hidden;
+}
+
+/* 展开状态 */
+.jcnl:not(.collapsed) {
+    height: auto;
+    overflow: visible;
 }
 
 

@@ -51,9 +51,15 @@
           <div class="xbt_text">检测能力</div>
         </div>
 
-        <el-tooltip style="width: 50%;" :content="gcgwList?.detectItemName" effect="light">
-          <div class="jcnl"> {{ gcgwList?.detectItemName }}</div>
-        </el-tooltip>
+        <div class="jcnl-container">
+          <div class="jcnl" :class="{ collapsed: !isDetectExpanded }" ref="detectContent">
+            <span>{{ gcgwList?.detectItemName }}</span>
+            <div v-if="showDetectToggle" class="toggle-btn" @click="isDetectExpanded = !isDetectExpanded">
+              {{ isDetectExpanded ? '收起' : '展开' }}
+              <i :class="isDetectExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"></i>
+            </div>
+          </div>
+        </div>
 
         <div class="data-cards">
           <div class="data-card">
@@ -93,8 +99,14 @@
           <img src="@/assets/xbt.png" />
           <div class="xbt_text">创新应用</div>
         </div>
-        <div class="cxsj">
-          <span> {{ gcgwList?.innovativeDesign }}</span>
+        <div class="jcgw-container" style="width: 100%;">
+          <div class="jcgw" :class="{ collapsed: !isInnovExpanded }" ref="innovContent">
+            <span>{{ gcgwList?.innovativeDesign }}</span>
+            <div v-if="showInnovToggle" class="toggle-btn" @click="isInnovExpanded = !isInnovExpanded">
+              {{ isInnovExpanded ? '收起' : '展开' }}
+              <i :class="isInnovExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"></i>
+            </div>
+          </div>
         </div>
         <!-- <div class="xbt">
           <img src="@/assets/xbt.png" />
@@ -502,6 +514,16 @@ const isIntroExpanded = ref(false);
 const showIntroToggle = ref(false);
 const introContent = ref(null);
 
+// 创新应用展开/收起功能
+const isInnovExpanded = ref(false);
+const showInnovToggle = ref(false);
+const innovContent = ref(null);
+
+// 检测能力展开/收起功能
+const isDetectExpanded = ref(false);
+const showDetectToggle = ref(false);
+const detectContent = ref(null);
+
 const checkIntroOverflow = () => {
   nextTick(() => {
     const el = introContent.value;
@@ -526,6 +548,52 @@ const checkIntroOverflow = () => {
       }
     });
   });
+};
+
+const checkInnovOverflow = () => {
+  nextTick(() => {
+    const el = innovContent.value;
+    if (!el) return;
+
+    const wasExpanded = isInnovExpanded.value;
+    isInnovExpanded.value = true;
+
+    nextTick(() => {
+      const contentHeight = el.scrollHeight;
+      const containerHeight = 60;
+      showInnovToggle.value = contentHeight > containerHeight;
+
+      if (!wasExpanded) {
+        isInnovExpanded.value = false;
+      }
+    });
+  });
+};
+
+const checkDetectOverflow = () => {
+  nextTick(() => {
+    const el = detectContent.value;
+    if (!el) return;
+
+    const wasExpanded = isDetectExpanded.value;
+    isDetectExpanded.value = true;
+
+    nextTick(() => {
+      const contentHeight = el.scrollHeight;
+      const containerHeight = 30; // jcnl 收起时的高度
+      showDetectToggle.value = contentHeight > containerHeight;
+
+      if (!wasExpanded) {
+        isDetectExpanded.value = false;
+      }
+    });
+  });
+};
+
+const handleResize = () => {
+  checkIntroOverflow();
+  checkInnovOverflow();
+  checkDetectOverflow();
 };
 
 // 工位信息 - 初始化为空对象
@@ -571,7 +639,7 @@ const getjcgwList = async () => {
     if (USE_MOCK_FALLBACK) gcgwList.value = { ...MOCK_GCGW_DATA[0] };
   }
   // 数据更新后重新检查溢出
-  setTimeout(() => checkIntroOverflow(), 100);
+  setTimeout(() => { checkIntroOverflow(); checkInnovOverflow(); checkDetectOverflow(); }, 100);
 };
 
 // 检测任务详情列表 - 初始化为空数组
@@ -782,11 +850,11 @@ onMounted(() => {
   getjcgwList();
   getjcrwList();
 
-  // 检查工位简介是否需要展开/收起按钮（延迟执行以确保 DOM 已更新）
-  setTimeout(() => checkIntroOverflow(), 100);
+  // 检查工位简介/创新应用是否需要展开/收起按钮（延迟执行以确保 DOM 已更新）
+  setTimeout(() => { checkIntroOverflow(); checkInnovOverflow(); checkDetectOverflow(); }, 100);
 
   // 监听窗口大小变化，重新检查溢出
-  window.addEventListener('resize', checkIntroOverflow);
+  window.addEventListener('resize', handleResize);
 
   // 使用新的数据结构初始化
   lstPlanResults.value = MOCK_FAngZhen.sampleDetectionDetailRespList?.[0] || [];
@@ -794,7 +862,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
-  window.removeEventListener('resize', checkIntroOverflow);
+  window.removeEventListener('resize', handleResize);
 });
 </script>
 
