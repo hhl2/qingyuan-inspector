@@ -160,7 +160,7 @@ export const DEFAULT_GCGW_DATA = {
 export const MOCK_GCGW_DATA = [{
     id: "222",
     stationCode: "xxx",
-    stationName: "批量避雷针检测工位",
+    stationName: "电缆智能制样检测工位",
     stationIntroduction: "实现对10kV避雷器工频参考电压试验、直流参考电压试验局部放电试验、0.75倍直流参考电压下泄露电流试验、持电流试验、密封试验，具备在预处理区完成外观检查、统爬电比距检查，对12支避雷器一次接线，一键启动测量。除预处理可人工辅助外，其他检测自动完成，无需人工参与,实现对10kV避雷器工频参考电压试验、直流参考电压试验局部放电试验、0.75倍直流参考电压下泄露电流试验、持电流试验、密封试验，具备在预处理区完成外观检查、统爬电比距检查，对12支避雷器一次接线，一键启动测量。除预处理可人工辅助外，其他检测自动完成，无需人工参与",
     stationStatus: 2,
     stationStatusName: "忙碌",
@@ -328,3 +328,20 @@ export const STATUS_TEXT_MAP = {
 }
 
 export const getStatusText = (status) => STATUS_TEXT_MAP[status] || '未知状态'
+
+// 电缆智能制样检测工位 - 视频标签列表
+// 对应 external-videos/电缆保护管智能制样检测工位2/ 文件夹下的视频文件
+export const CABLE_STATION_VIDEO_TABS = [
+    { label: '外观尺寸检查', file: '1.外观尺寸检查.mp4' },
+    { label: '断裂伸长率', file: '2.断裂伸长率.mp4' },
+    { label: '环刚度实验(23℃)', file: '3.环刚度实验(23℃).mp4' },
+    { label: '环刚度实验(80℃)', file: '4.环刚度实验(80℃).mp4' },
+    { label: '压扁实验', file: '5.压扁实验.mp4' },
+    { label: '落锤冲击实验(23℃)', file: '6.落锤冲击实验(23℃).mp4' },
+    { label: '落锤冲击实验(低温℃)', file: '7.落锤冲击实验(低温℃).mp4' },
+    { label: '维卡软化温度实验', file: '8.维卡软化温度实验.mp4' },
+    { label: '纵向回缩率实验', file: '9.纵向回缩率实验.mp4' },
+]
+
+// 电缆视频所在子文件夹
+export const CABLE_VIDEO_FOLDER = '电缆保护管智能制样检测工位2'

@@ -349,15 +349,30 @@
         <div class="close-popup" @click="closeMenus">×</div>
       </div>
       <div class="context_tan">
-        <!-- 视频播放 -->
-        <video v-if="videoSrc" ref="videoPlayer" style="width: 100%; height: 100%" :src="videoSrc" controls autoplay
-          muted loop playsinline class="animated-video"></video>
-        <!-- 无视频时显示占位 -->
-        <div v-else class="no-video">
-          <span>暂无视频信号</span>
+        <div class="context_tan_name">{{ gcgwList?.stationName || defaultStationNames }}</div>
+        <!-- 电缆智能制样检测工位：标签栏切换视频 -->
+        <div v-if="gcgwList?.stationName == '电缆智能制样检测工位' || defaultStationNames == '电缆智能制样检测工位'"
+          class="cable-video-tabs-wrap">
+          <el-tabs v-model="cableActiveTab" class="cable-tabs" @tab-change="onCableTabChange">
+            <el-tab-pane v-for="tab in CABLE_STATION_VIDEO_TABS" :key="tab.file" :label="tab.label" :name="tab.file" />
+          </el-tabs>
+          <video v-if="cableVideoSrc" ref="cableVideoPlayer" :src="cableVideoSrc" :key="cableVideoSrc"
+            class="cable-video-player" controls autoplay muted loop playsinline />
+          <div v-else class="no-video">
+            <span>暂无视频信号</span>
+          </div>
         </div>
+        <!-- 其他工位：直接播放单个视频 -->
+        <template v-else>
+          <video v-if="videoSrc" ref="videoPlayer" style="width: 100%; height: 100%;" :src="videoSrc" controls autoplay
+            muted loop playsinline class="animated-video normal-station-video"></video>
+          <div v-else class="no-video">
+            <span>暂无视频信号</span>
+          </div>
+        </template>
       </div>
     </div>
+
 
     <div v-if="showMenux" class="context-menus" ref="menuRef">
       <div class="context_tans">
@@ -436,10 +451,26 @@ import {
   queryDetectPlanInfoListPage,
   querySampleDetectionDetail
 } from "@/api/user";
-import { MOCK_FAngZhen, DEFAULT_GCGW_DATA, getVideoBasePath, VIDEO_NAME_MAP, MOCK_GCGW_DATA, MOCK_JCRW_LIST, MOCK_JCRWXQ_LIST } from "@/constants/inspectionMock";
+import { MOCK_FAngZhen, DEFAULT_GCGW_DATA, getVideoBasePath, VIDEO_NAME_MAP, MOCK_GCGW_DATA, MOCK_JCRW_LIST, MOCK_JCRWXQ_LIST, CABLE_STATION_VIDEO_TABS, CABLE_VIDEO_FOLDER } from "@/constants/inspectionMock";
 
 // 定义事件发射器
 const emit = defineEmits(['update:isPanelVisible']);
+
+// ========== 电缆智能制样检测工位：视频标签栏 ==========
+// 当前激活的标签（用视频文件名作为 name）
+const cableActiveTab = ref(CABLE_STATION_VIDEO_TABS[0]?.file || '')
+// 当前电缆视频的完整路径（用普通 ref，避免 computed 更新不触发重载）
+const cableVideoSrc = ref(
+  CABLE_STATION_VIDEO_TABS[0]?.file
+    ? `${getVideoBasePath()}${CABLE_VIDEO_FOLDER}/${CABLE_STATION_VIDEO_TABS[0].file}`
+    : null
+)
+// 监听 tab 切换，显式更新视频路径
+const onCableTabChange = (fileName) => {
+  cableActiveTab.value = fileName
+  cableVideoSrc.value = `${getVideoBasePath()}${CABLE_VIDEO_FOLDER}/${fileName}`
+}
+// =====================================================
 
 // ========== 兜底数据开关 ==========
 // true = 使用兜底数据（API无数据时显示测试数据）
@@ -832,7 +863,7 @@ watch(showMenux, (newValue) => {
 // 生命周期
 onMounted(() => {
   // 注册全局点击事件监听器
-  document.addEventListener("click", handleClickOutside);
+  // document.addEventListener("click", handleClickOutside);
 
   // 初始化工位数据并检查 id
   const parsedData = initializeStationData();
@@ -898,12 +929,25 @@ onUnmounted(() => {
 
 .context_tan {
   width: 545px;
-  height: 340px;
+  height: auto; /* 自适应内容，不固定高度 */
   background: transparent;
   border: none;
-  margin: 50px 0px 0px 30px;
+  margin: 25px 0px 0px 30px;
   overflow: hidden;
   border-radius: 4px;
+}
+
+.context_tan_name {
+  font-family: Microsoft YaHei !important;
+  font-size: 20px;
+  color: #FFFFFF !important;
+  background: linear-gradient(0deg, #6CB0FD 0%, #FFFFFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-left: 10px;
+  margin-bottom: 5px;
+
 }
 
 .context_tans {
@@ -1166,5 +1210,68 @@ onUnmounted(() => {
 
 .param-table-wrapper :deep(.param-table .el-table__empty-text) {
   color: #6c7a89 !important;
+}
+
+
+
+/* ========== 电缆工位 视频标签栏 ========== */
+.cable-video-tabs-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 345px; /* 连同标题名称共375px，减去标题名称约30px */
+}
+
+/* tabs 容器，高度固定以剑余空间给视频 */
+.cable-tabs {
+  flex-shrink: 0;
+}
+
+/* 深度穿透 el-tabs 样式，适配暗色背景 */
+.cable-tabs :deep(.el-tabs__header) {
+  margin: 0;
+  background: transparent;
+  border-bottom: 1px solid rgba(33, 139, 229, 0.4);
+}
+
+.cable-tabs :deep(.el-tabs__nav-wrap::after) {
+  background-color: rgba(33, 139, 229, 0.4);
+}
+
+.cable-tabs :deep(.el-tabs__item) {
+  color: #97CDF8;
+  font-size: 11px;
+  padding: 0 10px;
+  height: 32px;
+  line-height: 32px;
+}
+
+.cable-tabs :deep(.el-tabs__item.is-active) {
+  color: #00CFFF;
+  font-weight: bold;
+}
+
+.cable-tabs :deep(.el-tabs__active-bar) {
+  background-color: #00CFFF;
+}
+
+.cable-tabs :deep(.el-tabs__item:hover) {
+  color: #FFFFFF;
+}
+
+/* 视频播放器，占满剩余空间 */
+.cable-video-player {
+  /* flex: 1; */
+  width: 100%;
+  height: 300px;
+  /* context_tan(340) - 标题(30) - tabs头(32) */
+  min-height: 0;
+  object-fit: contain;
+  background: #000;
+}
+
+/* 其他工位视频顶部间距 */
+.normal-station-video {
+  margin-top: 10px;
 }
 </style>
