@@ -929,7 +929,8 @@ onUnmounted(() => {
 
 .context_tan {
   width: 545px;
-  height: auto; /* 自适应内容，不固定高度 */
+  height: auto;
+  /* 自适应内容，不固定高度 */
   background: transparent;
   border: none;
   margin: 25px 0px 0px 30px;
@@ -1219,7 +1220,8 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 345px; /* 连同标题名称共375px，减去标题名称约30px */
+  height: 345px;
+  /* 连同标题名称共375px，减去标题名称约30px */
 }
 
 /* tabs 容器，高度固定以剑余空间给视频 */

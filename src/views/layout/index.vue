@@ -225,6 +225,7 @@
     height: 22px;
     color: white;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
 }
 
 .custom-content .text {
@@ -232,6 +233,7 @@
     font-weight: 600;
     color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
 </style>
 

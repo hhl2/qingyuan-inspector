@@ -10,7 +10,7 @@ export const DEFAULT_ALERT_STATS = []
 export const MOCK_ALERT_STATS = [
     {
         alarmTypeName: "设备故障",
-        alarmTypeCount: 0,
+        alarmTypeCount: 1,
     },
     {
         alarmTypeName: "通信异常",
@@ -31,6 +31,12 @@ export const DEFAULT_ALERT_LIST = []
 
 // 告警列表 - 兜底测试数据
 export const MOCK_ALERT_LIST = [
+    {
+        alarmTimeStr: "2026-06-15 14:20:00",
+        alarmContent: "【双重提醒测试】屏幕两侧红色闪烁与语音警报已激活！",
+        alarmTypeName: "设备故障",
+        alarmLevelName: "紧急",
+    },
     {
         alarmTimeStr: "2025-10-15 10:30:00",
         alarmContent: "变压器温度过高告警",

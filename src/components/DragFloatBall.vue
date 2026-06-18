@@ -79,7 +79,7 @@ const props = defineProps({
     // 是否显示关闭按钮
     showCloseButton: {
         type: Boolean,
-        default: true
+        default: false
     },
     // 关闭按钮大小（相对于悬浮球的比例）
     closeButtonSize: {
@@ -476,19 +476,20 @@ onUnmounted(() => {
     user-select: none;
     touch-action: none;
 
-    /* 半透明风格 */
-    background: rgba(0, 0, 0, 0.35) !important;
+    /* 半透明暗黑背景 */
+    background: rgba(0, 0, 0, 0.4) !important;
 
-    /* 毛玻璃效果 */
+    /* 毛玻璃滤镜 */
     backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
 
-    /* 边框和阴影 */
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    /* 微光白色科技感边框 */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
     box-shadow:
-        0 8px 32px 0 rgba(0, 0, 0, 0.3),
+        0 8px 32px 0 rgba(0, 0, 0, 0.35),
         0 2px 8px 0 rgba(0, 0, 0, 0.12),
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
 
     /* 平滑过渡 - 吸边效果的关键 */
     transition:
@@ -497,47 +498,58 @@ onUnmounted(() => {
         left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
         top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
         box-shadow 0.3s ease,
-        border 0.3s ease;
+        border-color 0.3s ease,
+        background-color 0.3s ease;
 }
 
 .drag-float-ball:hover:not(:active):not(.snapped) {
     transform: scale(1.06);
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.55) !important;
     box-shadow:
         0 12px 40px 0 rgba(0, 0, 0, 0.4),
         0 4px 12px 0 rgba(0, 0, 0, 0.16),
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
 }
 
 .drag-float-ball:active {
     cursor: grabbing;
     transform: scale(0.94);
+    border-color: rgba(255, 255, 255, 0.28);
     box-shadow:
-        0 4px 16px 0 rgba(0, 0, 0, 0.3),
-        inset 0 2px 4px 0 rgba(0, 0, 0, 0.12);
+        0 4px 16px 0 rgba(0, 0, 0, 0.35),
+        inset 0 2px 4px 0 rgba(0, 0, 0, 0.15);
 }
 
 /* 吸边状态 - 左侧竖条 */
 .drag-float-ball.snapped-left {
-    transform: translateX(-80%);
+    transform: translateX(-75%);
     border-radius: 0 50% 50% 0;
     border-left: none;
+    box-shadow: 
+        0 4px 16px rgba(0,0,0,0.35),
+        inset 0 0 8px rgba(255, 255, 255, 0.05);
 }
 
 /* 吸边状态 - 右侧竖条 */
 .drag-float-ball.snapped-right {
-    transform: translateX(80%);
+    transform: translateX(75%);
     border-radius: 50% 0 0 50%;
     border-right: none;
+    box-shadow: 
+        0 4px 16px rgba(0,0,0,0.35),
+        inset 0 0 8px rgba(255, 255, 255, 0.05);
 }
 
 /* hover时展开 */
 .drag-float-ball.snapped.hovering {
     transform: translateX(0) !important;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.5) !important;
     box-shadow:
-        0 12px 48px 0 rgba(0, 0, 0, 0.4),
-        0 4px 16px 0 rgba(0, 0, 0, 0.2),
+        0 12px 48px 0 rgba(0, 0, 0, 0.45),
+        0 4px 16px 0 rgba(0, 0, 0, 0.22),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -547,7 +559,7 @@ onUnmounted(() => {
     font-weight: 600;
     text-align: center;
     line-height: 1.3;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     pointer-events: none;
     letter-spacing: 0.5px;
     opacity: 1;
@@ -562,39 +574,40 @@ onUnmounted(() => {
 /* 关闭按钮样式 */
 .close-button {
     position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 22px;
-    height: 22px;
+    top: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 1001;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+    background: linear-gradient(135deg, #ff5252 0%, #c62828 100%);
     box-shadow:
-        0 2px 8px rgba(238, 90, 90, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        0 0 10px rgba(255, 82, 82, 0.65),
+        0 2px 5px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     transform: scale(1);
     user-select: none;
-    font-weight: bold;
-    border: 2px solid rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     color: white;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 .close-button:hover {
-    transform: scale(1.15);
-    background: linear-gradient(135deg, #ff5252 0%, #e53935 100%);
+    transform: scale(1.18);
+    background: linear-gradient(135deg, #ff1744 0%, #b71c1c 100%);
     box-shadow:
-        0 4px 16px rgba(229, 57, 53, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        0 0 14px rgba(255, 23, 68, 0.9),
+        0 4px 10px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .close-button:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
     box-shadow: 0 1px 4px rgba(229, 57, 53, 0.4);
 }
 
